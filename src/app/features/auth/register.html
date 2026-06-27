@@ -1,0 +1,120 @@
+<div class="auth-container fade-in">
+  <div class="background-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="glass-card auth-card">
+    <div class="auth-header">
+      <div class="logo-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+        </svg>
+      </div>
+      <h1 class="auth-title">Create <span class="gradient-text">Account</span></h1>
+      <p class="auth-subtitle">Join the Education Management Portal</p>
+    </div>
+
+    <!-- Alert Banners -->
+    <div *ngIf="errorMessage()" class="alert error-alert fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <span>{{ errorMessage() }}</span>
+    </div>
+
+    <div *ngIf="successMessage()" class="alert success-alert fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ successMessage() }}</span>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="name" class="form-label">Full Name</label>
+        <div class="input-wrapper">
+          <input 
+            id="name" 
+            type="text" 
+            formControlName="name" 
+            class="glass-input" 
+            placeholder="John Doe"
+            [class.input-error]="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
+        </div>
+        <span *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']" class="error-text">
+          Name is required
+        </span>
+        <span *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['minlength']" class="error-text">
+          Name must be at least 2 characters
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <div class="input-wrapper">
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            class="glass-input" 
+            placeholder="name@institution.edu"
+            [class.input-error]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        </div>
+        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
+          Email is required
+        </span>
+        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-text">
+          Please enter a valid email address
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-wrapper">
+          <input 
+            id="password" 
+            type="password" 
+            formControlName="password" 
+            class="glass-input" 
+            placeholder="••••••••"
+            [class.input-error]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        </div>
+        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-text">
+          Password is required
+        </span>
+        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-text">
+          Password must be at least 6 characters
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <div class="input-wrapper">
+          <input 
+            id="confirmPassword" 
+            type="password" 
+            formControlName="confirmPassword" 
+            class="glass-input" 
+            placeholder="••••••••"
+            [class.input-error]="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.invalid">
+        </div>
+        <span *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['required']" class="error-text">
+          Please confirm your password
+        </span>
+        <span *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['passwordMismatch']" class="error-text">
+          Passwords do not match
+        </span>
+      </div>
+
+      <button type="submit" class="btn-primary auth-btn" [disabled]="isLoading()">
+        <span *ngIf="!isLoading()">Register Account</span>
+        <div *ngIf="isLoading()" class="spinner"></div>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login" class="auth-link">Login Here</a></p>
+    </div>
+  </div>
+</div>

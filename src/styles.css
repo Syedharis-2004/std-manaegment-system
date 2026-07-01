@@ -129,6 +129,11 @@ p {
   color: var(--text-muted);
 }
 
+select.glass-input option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* Beautiful Interactive Buttons */
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);

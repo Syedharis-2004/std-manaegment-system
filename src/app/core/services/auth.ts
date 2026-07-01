@@ -1,11 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
 export interface User {
   email: string;
   password?: string;
   name?: string;
+  role?: 'student' | 'teacher' | 'admin';
 }
 
 @Injectable({
@@ -21,28 +22,51 @@ export class AuthService {
   constructor() {
     // Restore session on bootstrap
     const savedUser = localStorage.getItem('edu_user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('edu_token');
+    if (savedUser && savedToken) {
       try {
         this.currentUser.set(JSON.parse(savedUser));
       } catch (e) {
-        localStorage.removeItem('edu_user');
+        this.logout();
       }
+    } else {
+      this.logout();
     }
   }
 
   isLoggedIn(): boolean {
-    return this.currentUser() !== null;
+    return this.currentUser() !== null && localStorage.getItem('edu_token') !== null;
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('edu_token');
   }
 
   register(user: User): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, user);
+    // Backend register endpoint is /auth/register
+    return this.http.post<any>(`${this.apiUrl}/auth/register`, user);
   }
 
   login(user: User): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, user).pipe(
+    // Backend login endpoint is /auth/login, expecting URL-encoded Form fields
+    const body = new HttpParams()
+      .set('username', user.email)
+      .set('password', user.password || '');
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, body.toString(), { headers }).pipe(
       tap(response => {
-        if (response.message === 'Login Successful') {
-          const sessionUser: User = { email: user.email, name: user.email.split('@')[0] };
+        // response structure: { message: string, access_token: string, token_type: string, role: string }
+        if (response.access_token) {
+          localStorage.setItem('edu_token', response.access_token);
+          const sessionUser: User = { 
+            email: user.email, 
+            name: user.name || user.email.split('@')[0], 
+            role: response.role 
+          };
           localStorage.setItem('edu_user', JSON.stringify(sessionUser));
           this.currentUser.set(sessionUser);
         }
@@ -52,6 +76,11 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('edu_user');
+    localStorage.removeItem('edu_token');
     this.currentUser.set(null);
+  }
+
+  getMe(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/auth/me`);
   }
 }

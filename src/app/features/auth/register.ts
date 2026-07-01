@@ -19,7 +19,8 @@ export class Register {
     name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    confirmPassword: ['', [Validators.required]]
+    confirmPassword: ['', [Validators.required]],
+    role: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 
   isLoading = signal(false);
@@ -52,9 +53,14 @@ export class Register {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const { name, email, password } = this.registerForm.value;
+    const { name, email, password, role } = this.registerForm.value;
 
-    this.authService.register({ name: name!, email: email!, password: password! }).subscribe({
+    this.authService.register({ 
+      name: name!, 
+      email: email!, 
+      password: password!, 
+      role: role as any 
+    }).subscribe({
       next: (response) => {
         this.isLoading.set(false);
         this.successMessage.set('Registration Successful! Redirecting to login...');

@@ -107,6 +107,25 @@
         </span>
       </div>
 
+      <div class="form-group">
+        <label for="role" class="form-label">Portal Role</label>
+        <div class="input-wrapper">
+          <select 
+            id="role" 
+            formControlName="role" 
+            class="glass-input" 
+            [class.input-error]="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
+            <option value="" disabled selected>Select user role</option>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <span *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.errors?.['required']" class="error-text">
+          Role is required
+        </span>
+      </div>
+
       <button type="submit" class="btn-primary auth-btn" [disabled]="isLoading()">
         <span *ngIf="!isLoading()">Register Account</span>
         <div *ngIf="isLoading()" class="spinner"></div>

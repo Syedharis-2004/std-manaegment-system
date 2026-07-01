@@ -50,7 +50,7 @@ export class Login {
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Connection error. Make sure the backend is running.');
+        this.errorMessage.set(err.error?.detail || err.error?.message || 'Connection error. Make sure the backend is running.');
       }
     });
   }

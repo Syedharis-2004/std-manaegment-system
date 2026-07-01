@@ -1,0 +1,108 @@
+<div class="student-dashboard fade-in">
+  
+  <!-- Backend Authorization Status Alert -->
+  <div class="glass-card status-alert" [class.authorized]="isAuthorized()" [class.loading]="isLoading()" [class.unauthorized]="!isLoading() && !isAuthorized()">
+    <div class="status-indicator"></div>
+    <span class="status-text">{{ backendMessage() }}</span>
+  </div>
+
+  <div *ngIf="isAuthorized()">
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      <!-- GPA Card -->
+      <div class="glass-card metric-card">
+        <div class="metric-icon-wrapper blue">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M12 2.25V4.5m0 11.25v2.25" />
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Cumulative GPA</span>
+          <h2 class="metric-value">{{ gpa() }} <span class="metric-unit">/ 4.0</span></h2>
+        </div>
+      </div>
+
+      <!-- Attendance Card -->
+      <div class="glass-card metric-card">
+        <div class="metric-icon-wrapper green">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Class Attendance</span>
+          <h2 class="metric-value">{{ attendance() }}%</h2>
+        </div>
+      </div>
+
+      <!-- Credit Hours Card -->
+      <div class="glass-card metric-card">
+        <div class="metric-icon-wrapper purple">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+          </svg>
+        </div>
+        <div class="metric-details">
+          <span class="metric-label">Completed Credits</span>
+          <h2 class="metric-value">{{ completedCredits() }} <span class="metric-unit">/ {{ totalCredits() }}</span></h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Columns Grid -->
+    <div class="dashboard-columns-grid">
+      
+      <!-- Courses List -->
+      <div class="glass-card column-card">
+        <div class="card-title-bar">
+          <h3>Enrolled Courses</h3>
+          <span class="badge blue">Spring 2026</span>
+        </div>
+        <div class="course-list">
+          <div *ngFor="let course of courses()" class="course-item">
+            <div class="course-header">
+              <div class="course-info">
+                <span class="course-code">{{ course.code }}</span>
+                <h4 class="course-name">{{ course.name }}</h4>
+                <span class="course-instructor">{{ course.instructor }}</span>
+              </div>
+              <span class="course-grade">{{ course.grade }}</span>
+            </div>
+            <div class="progress-track-wrapper">
+              <div class="progress-track">
+                <div class="progress-bar" [style.width.%]="course.progress"></div>
+              </div>
+              <span class="progress-text">{{ course.progress }}% Syllabus</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignments & Tasks -->
+      <div class="glass-card column-card">
+        <div class="card-title-bar">
+          <h3>Pending Assignments</h3>
+          <span class="badge rose">Action Required</span>
+        </div>
+        <div class="assignment-list">
+          <div *ngFor="let task of assignments()" class="assignment-item" [class.urgent]="task.urgent && task.status === 'pending'">
+            <div class="assignment-details">
+              <div class="assignment-main">
+                <h4 class="assignment-title">{{ task.title }}</h4>
+                <span class="assignment-course">{{ task.course }}</span>
+              </div>
+              <span class="assignment-due">{{ task.due }}</span>
+            </div>
+            <div class="assignment-footer">
+              <span class="status-badge" [class.completed]="task.status === 'completed'" [class.pending]="task.status === 'pending'">
+                {{ task.status | titlecase }}
+              </span>
+              <button *ngIf="task.status === 'pending'" class="btn-action-sm">Submit Work</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

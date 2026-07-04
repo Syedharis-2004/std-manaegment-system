@@ -1,0 +1,205 @@
+<div class="admission-page-container fade-in">
+  <!-- Glowing Background Blobs -->
+  <div class="background-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="glass-card admission-card">
+    <!-- Header -->
+    <div class="admission-header">
+      <h1 class="page-title">Student <span class="gradient-text">Admission Form</span></h1>
+      <p class="page-subtitle">Enter student credentials and registration details</p>
+    </div>
+
+    <!-- Alert / Success Message -->
+    <div *ngIf="successMessage" class="alert success-alert fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <form [formGroup]="admissionForm" (ngSubmit)="onSubmit()" class="admission-form">
+      
+      <!-- Section 1: Personal Details -->
+      <h2 class="section-title">Personal Details</h2>
+      <div class="fields-grid">
+        <div class="form-group">
+          <label for="name" class="form-label">Full Name *</label>
+          <input id="name" type="text" formControlName="name" class="glass-input" placeholder="Enter student's name"
+            [class.input-error]="admissionForm.get('name')?.invalid && (admissionForm.get('name')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('name')?.invalid && (admissionForm.get('name')?.touched || isSubmitted)">
+            Name is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="fatherName" class="form-label">Father / Guardian's Name *</label>
+          <input id="fatherName" type="text" formControlName="fatherName" class="glass-input" placeholder="Enter father's name"
+            [class.input-error]="admissionForm.get('fatherName')?.invalid && (admissionForm.get('fatherName')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('fatherName')?.invalid && (admissionForm.get('fatherName')?.touched || isSubmitted)">
+            Father's name is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="fatherProfession" class="form-label">Father's Profession</label>
+          <input id="fatherProfession" type="text" formControlName="fatherProfession" class="glass-input" placeholder="Profession">
+        </div>
+
+        <div class="form-group">
+          <label for="fatherMobile" class="form-label">Father's Mobile No *</label>
+          <input id="fatherMobile" type="text" formControlName="fatherMobile" class="glass-input" placeholder="e.g. 03001234567"
+            [class.input-error]="admissionForm.get('fatherMobile')?.invalid && (admissionForm.get('fatherMobile')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('fatherMobile')?.invalid && (admissionForm.get('fatherMobile')?.touched || isSubmitted)">
+            Mobile number is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="studentClass" class="form-label">Class *</label>
+          <input id="studentClass" type="text" formControlName="studentClass" class="glass-input" placeholder="Class"
+            [class.input-error]="admissionForm.get('studentClass')?.invalid && (admissionForm.get('studentClass')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('studentClass')?.invalid && (admissionForm.get('studentClass')?.touched || isSubmitted)">
+            Class is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="section" class="form-label">Section</label>
+          <input id="section" type="text" formControlName="section" class="glass-input" placeholder="Section">
+        </div>
+
+        <div class="form-group">
+          <label for="schoolName" class="form-label">Previous School / College Name</label>
+          <input id="schoolName" type="text" formControlName="schoolName" class="glass-input" placeholder="School/College Name">
+        </div>
+
+        <div class="form-group">
+          <label for="lastQualification" class="form-label">Last Qualification</label>
+          <input id="lastQualification" type="text" formControlName="lastQualification" class="glass-input" placeholder="Last Qualification">
+        </div>
+        
+        <div class="form-group span-2">
+          <label for="address" class="form-label">Address *</label>
+          <input id="address" type="text" formControlName="address" class="glass-input" placeholder="Complete address"
+            [class.input-error]="admissionForm.get('address')?.invalid && (admissionForm.get('address')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('address')?.invalid && (admissionForm.get('address')?.touched || isSubmitted)">
+            Address is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label for="whatsappNumber" class="form-label">WhatsApp Number</label>
+          <input id="whatsappNumber" type="text" formControlName="whatsappNumber" class="glass-input" placeholder="For notifications">
+        </div>
+
+        <div class="form-group">
+          <label for="dateOfAdmission" class="form-label">Date of Admission *</label>
+          <input id="dateOfAdmission" type="date" formControlName="dateOfAdmission" class="glass-input"
+            [class.input-error]="admissionForm.get('dateOfAdmission')?.invalid && (admissionForm.get('dateOfAdmission')?.touched || isSubmitted)">
+          <span class="error-text" *ngIf="admissionForm.get('dateOfAdmission')?.invalid && (admissionForm.get('dateOfAdmission')?.touched || isSubmitted)">
+            Date of admission is required
+          </span>
+        </div>
+      </div>
+
+      <!-- Section 2: Group Selection & Office Info -->
+      <div class="sections-row">
+        <!-- Group Selection -->
+        <div class="section-column">
+          <h2 class="section-title">Group Selection</h2>
+          <div class="radio-group-container">
+            <label class="glass-radio-label">
+              <input type="radio" formControlName="groupSelection" value="Pre. Eng">
+              <span class="radio-button"></span>
+              Pre. Engineering
+            </label>
+            <label class="glass-radio-label">
+              <input type="radio" formControlName="groupSelection" value="Pre. Medical">
+              <span class="radio-button"></span>
+              Pre. Medical
+            </label>
+            <label class="glass-radio-label">
+              <input type="radio" formControlName="groupSelection" value="Comp. Science">
+              <span class="radio-button"></span>
+              Computer Science
+            </label>
+            <label class="glass-radio-label">
+              <input type="radio" formControlName="groupSelection" value="Commerce">
+              <span class="radio-button"></span>
+              Commerce
+            </label>
+          </div>
+        </div>
+
+        <!-- Required Documents -->
+        <div class="section-column">
+          <h2 class="section-title">Required Documents</h2>
+          <div class="upload-group-container">
+            <!-- Doc 1: CNIC -->
+            <div class="upload-item">
+              <span class="upload-label">Father's / Guardian CNIC Copy</span>
+              <div class="upload-box-wrapper" (click)="cnicUpload.click()">
+                <input type="file" #cnicUpload (change)="onFileSelected($event, 'docsCnic')" style="display: none;" accept="image/*,.pdf">
+                <div class="upload-box-content">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsCnic')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-success" *ngIf="getFileName('docsCnic')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="upload-text">{{ getFileName('docsCnic') || 'Choose CNIC Copy (Image/PDF)' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Doc 2: Photo -->
+            <div class="upload-item">
+              <span class="upload-label">Student's Photograph (1 Photo)</span>
+              <div class="upload-box-wrapper" (click)="photoUpload.click()">
+                <input type="file" #photoUpload (change)="onFileSelected($event, 'docsPhoto')" style="display: none;" accept="image/*">
+                <div class="upload-box-content">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsPhoto')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-success" *ngIf="getFileName('docsPhoto')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="upload-text">{{ getFileName('docsPhoto') || 'Choose Photograph (Image)' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Doc 3: Result Card -->
+            <div class="upload-item">
+              <span class="upload-label">Last Admit Card / Result Card Copy</span>
+              <div class="upload-box-wrapper" (click)="resultCardUpload.click()">
+                <input type="file" #resultCardUpload (change)="onFileSelected($event, 'docsResultCard')" style="display: none;" accept="image/*,.pdf">
+                <div class="upload-box-content">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsResultCard')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-success" *ngIf="getFileName('docsResultCard')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="upload-text">{{ getFileName('docsResultCard') || 'Choose Result Card (Image/PDF)' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" routerLink="/dashboard">Cancel</button>
+        <button type="submit" class="btn-primary">Submit Form</button>
+      </div>
+
+    </form>
+  </div>
+</div>

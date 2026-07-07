@@ -38,13 +38,35 @@ export class Login {
 
     this.authService.login({ email: email!, password: password! }).subscribe({
       next: (response) => {
-        this.isLoading.set(false);
-        if (response.message === 'Login Successful') {
-          this.successMessage.set('Login Successful! Redirecting...');
-          setTimeout(() => {
-            this.router.navigate(['/dashboard']);
-          }, 1500);
+        if (response.access_token) {
+          // Fetch additional profile details for name mapping
+          this.authService.getMe().subscribe({
+            next: (profile) => {
+              this.isLoading.set(false);
+              const fullName = `${profile.first_name} ${profile.last_name}`;
+              const sessionUser = {
+                email: profile.email || email!,
+                name: fullName,
+                role: profile.role
+              };
+              localStorage.setItem('edu_user', JSON.stringify(sessionUser));
+              this.authService.currentUser.set(sessionUser);
+
+              this.successMessage.set('Login Successful! Redirecting...');
+              setTimeout(() => {
+                this.router.navigate(['/dashboard']);
+              }, 1200);
+            },
+            error: () => {
+              this.isLoading.set(false);
+              this.successMessage.set('Login Successful! Redirecting...');
+              setTimeout(() => {
+                this.router.navigate(['/dashboard']);
+              }, 1200);
+            }
+          });
         } else {
+          this.isLoading.set(false);
           this.errorMessage.set(response.message || 'Invalid email or password');
         }
       },

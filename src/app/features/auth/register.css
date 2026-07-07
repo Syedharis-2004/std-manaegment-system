@@ -201,3 +201,24 @@
     padding: 2rem;
   }
 }
+
+/* Custom styling for register-card wide layout */
+.register-card {
+  max-width: 700px !important;
+}
+
+.register-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 1rem;
+}
+
+.register-grid .span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 640px) {
+  .register-grid {
+    grid-template-columns: 1fr;
+  }
+}

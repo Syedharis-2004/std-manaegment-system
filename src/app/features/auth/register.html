@@ -4,7 +4,7 @@
     <div class="blob blob-2"></div>
   </div>
 
-  <div class="glass-card auth-card">
+  <div class="glass-card auth-card register-card">
     <div class="auth-header">
       <div class="logo-icon">
         <img src="assets/logo.png" alt="JE Academy Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
@@ -29,99 +29,170 @@
     </div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
-      <div class="form-group">
-        <label for="name" class="form-label">Full Name</label>
-        <div class="input-wrapper">
-          <input 
-            id="name" 
-            type="text" 
-            formControlName="name" 
-            class="glass-input" 
-            placeholder="John Doe"
-            [class.input-error]="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
+      <div class="register-grid">
+        <!-- First Name -->
+        <div class="form-group">
+          <label for="first_name" class="form-label">First Name *</label>
+          <div class="input-wrapper">
+            <input 
+              id="first_name" 
+              type="text" 
+              formControlName="first_name" 
+              class="glass-input" 
+              placeholder="John"
+              [class.input-error]="registerForm.get('first_name')?.touched && registerForm.get('first_name')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('first_name')?.touched && registerForm.get('first_name')?.errors?.['required']" class="error-text">
+            First name is required
+          </span>
         </div>
-        <span *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['required']" class="error-text">
-          Name is required
-        </span>
-        <span *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.errors?.['minlength']" class="error-text">
-          Name must be at least 2 characters
-        </span>
-      </div>
 
-      <div class="form-group">
-        <label for="email" class="form-label">Email Address</label>
-        <div class="input-wrapper">
-          <input 
-            id="email" 
-            type="email" 
-            formControlName="email" 
-            class="glass-input" 
-            placeholder="name@institution.edu"
-            [class.input-error]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        <!-- Middle Name -->
+        <div class="form-group">
+          <label for="middle_name" class="form-label">Middle Name</label>
+          <div class="input-wrapper">
+            <input 
+              id="middle_name" 
+              type="text" 
+              formControlName="middle_name" 
+              class="glass-input" 
+              placeholder="Optional">
+          </div>
         </div>
-        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
-          Email is required
-        </span>
-        <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-text">
-          Please enter a valid email address
-        </span>
-      </div>
 
-      <div class="form-group">
-        <label for="password" class="form-label">Password</label>
-        <div class="input-wrapper">
-          <input 
-            id="password" 
-            type="password" 
-            formControlName="password" 
-            class="glass-input" 
-            placeholder="••••••••"
-            [class.input-error]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        <!-- Last Name -->
+        <div class="form-group">
+          <label for="last_name" class="form-label">Last Name *</label>
+          <div class="input-wrapper">
+            <input 
+              id="last_name" 
+              type="text" 
+              formControlName="last_name" 
+              class="glass-input" 
+              placeholder="Doe"
+              [class.input-error]="registerForm.get('last_name')?.touched && registerForm.get('last_name')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('last_name')?.touched && registerForm.get('last_name')?.errors?.['required']" class="error-text">
+            Last name is required
+          </span>
         </div>
-        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-text">
-          Password is required
-        </span>
-        <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-text">
-          Password must be at least 6 characters
-        </span>
-      </div>
 
-      <div class="form-group">
-        <label for="confirmPassword" class="form-label">Confirm Password</label>
-        <div class="input-wrapper">
-          <input 
-            id="confirmPassword" 
-            type="password" 
-            formControlName="confirmPassword" 
-            class="glass-input" 
-            placeholder="••••••••"
-            [class.input-error]="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.invalid">
+        <!-- Father's Name -->
+        <div class="form-group">
+          <label for="father_name" class="form-label">Father's Name *</label>
+          <div class="input-wrapper">
+            <input 
+              id="father_name" 
+              type="text" 
+              formControlName="father_name" 
+              class="glass-input" 
+              placeholder="Richard Doe"
+              [class.input-error]="registerForm.get('father_name')?.touched && registerForm.get('father_name')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('father_name')?.touched && registerForm.get('father_name')?.errors?.['required']" class="error-text">
+            Father's name is required
+          </span>
         </div>
-        <span *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['required']" class="error-text">
-          Please confirm your password
-        </span>
-        <span *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['passwordMismatch']" class="error-text">
-          Passwords do not match
-        </span>
-      </div>
 
-      <div class="form-group">
-        <label for="role" class="form-label">Portal Role</label>
-        <div class="input-wrapper">
-          <select 
-            id="role" 
-            formControlName="role" 
-            class="glass-input" 
-            [class.input-error]="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
-            <option value="" disabled selected>Select user role</option>
-            <option value="student">Student</option>
-            <option value="teacher">Teacher</option>
-            <option value="admin">Administrator</option>
-          </select>
+        <!-- Mobile Number -->
+        <div class="form-group">
+          <label for="mobile_number" class="form-label">Mobile Number *</label>
+          <div class="input-wrapper">
+            <input 
+              id="mobile_number" 
+              type="text" 
+              formControlName="mobile_number" 
+              class="glass-input" 
+              placeholder="e.g. 03001234567"
+              [class.input-error]="registerForm.get('mobile_number')?.touched && registerForm.get('mobile_number')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('mobile_number')?.touched && registerForm.get('mobile_number')?.errors?.['required']" class="error-text">
+            Mobile number is required
+          </span>
+          <span *ngIf="registerForm.get('mobile_number')?.touched && registerForm.get('mobile_number')?.errors?.['pattern']" class="error-text">
+            Please enter a valid mobile number
+          </span>
         </div>
-        <span *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.errors?.['required']" class="error-text">
-          Role is required
-        </span>
+
+        <!-- Email Address -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address *</label>
+          <div class="input-wrapper">
+            <input 
+              id="email" 
+              type="email" 
+              formControlName="email" 
+              class="glass-input" 
+              placeholder="name@example.com"
+              [class.input-error]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']" class="error-text">
+            Email is required
+          </span>
+          <span *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['email']" class="error-text">
+            Please enter a valid email address
+          </span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password" class="form-label">Password *</label>
+          <div class="input-wrapper">
+            <input 
+              id="password" 
+              type="password" 
+              formControlName="password" 
+              class="glass-input" 
+              placeholder="••••••••"
+              [class.input-error]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']" class="error-text">
+            Password is required
+          </span>
+          <span *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']" class="error-text">
+            Password must be at least 6 characters
+          </span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirm_password" class="form-label">Confirm Password *</label>
+          <div class="input-wrapper">
+            <input 
+              id="confirm_password" 
+              type="password" 
+              formControlName="confirm_password" 
+              class="glass-input" 
+              placeholder="••••••••"
+              [class.input-error]="registerForm.get('confirm_password')?.touched && registerForm.get('confirm_password')?.invalid">
+          </div>
+          <span *ngIf="registerForm.get('confirm_password')?.touched && registerForm.get('confirm_password')?.errors?.['required']" class="error-text">
+            Please confirm your password
+          </span>
+          <span *ngIf="registerForm.get('confirm_password')?.touched && registerForm.get('confirm_password')?.errors?.['passwordMismatch']" class="error-text">
+            Passwords do not match
+          </span>
+        </div>
+
+        <!-- Portal Role -->
+        <div class="form-group span-2">
+          <label for="role" class="form-label">Portal Role *</label>
+          <div class="input-wrapper">
+            <select 
+              id="role" 
+              formControlName="role" 
+              class="glass-input" 
+              [class.input-error]="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
+              <option value="" disabled selected>Select user role</option>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <span *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.errors?.['required']" class="error-text">
+            Role is required
+          </span>
+        </div>
       </div>
 
       <button type="submit" class="btn-primary auth-btn" [disabled]="isLoading()">

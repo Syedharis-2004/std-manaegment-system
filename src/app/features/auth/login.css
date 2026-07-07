@@ -79,7 +79,8 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.25rem auto;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.15);
+  transition: var(--transition-elastic);
 }
 
 .logo-icon svg {
@@ -151,15 +152,15 @@
 }
 
 .error-alert {
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.2);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #991b1b;
 }
 
 .success-alert {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.08);
   border-color: rgba(16, 185, 129, 0.2);
-  color: #a7f3d0;
+  color: #065f46;
 }
 
 .auth-footer {

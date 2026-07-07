@@ -16,10 +16,14 @@ export class Register {
   private router = inject(Router);
 
   registerForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
+    first_name: ['', [Validators.required, Validators.minLength(2)]],
+    middle_name: [''],
+    last_name: ['', [Validators.required, Validators.minLength(2)]],
+    father_name: ['', [Validators.required, Validators.minLength(2)]],
+    mobile_number: ['', [Validators.required, Validators.pattern(/^[0-9+ \-]+$/)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
-    confirmPassword: ['', [Validators.required]],
+    confirm_password: ['', [Validators.required]],
     role: ['', [Validators.required]]
   }, { validators: this.passwordMatchValidator });
 
@@ -29,7 +33,7 @@ export class Register {
 
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
-    const confirmPassword = control.get('confirmPassword');
+    const confirmPassword = control.get('confirm_password');
 
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ passwordMismatch: true });
@@ -53,20 +57,29 @@ export class Register {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const { name, email, password, role } = this.registerForm.value;
+    const val = this.registerForm.value;
 
     this.authService.register({ 
-      name: name!, 
-      email: email!, 
-      password: password!, 
-      role: role as any 
+      first_name: val.first_name!,
+      middle_name: val.middle_name || '',
+      last_name: val.last_name!,
+      father_name: val.father_name!,
+      mobile_number: val.mobile_number!,
+      email: val.email!,
+      password: val.password!,
+      confirm_password: val.confirm_password!,
+      role: val.role as any
     }).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        this.successMessage.set('Registration Successful! Redirecting to login...');
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 1800);
+        if (response.message === 'User Registered Successfully') {
+          this.successMessage.set('Registration Successful! Redirecting to login...');
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 1800);
+        } else {
+          this.errorMessage.set(response.message || 'Mobile number or email already exists.');
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

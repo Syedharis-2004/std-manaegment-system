@@ -1,12 +1,18 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 
 export interface User {
-  email: string;
+  email?: string;
   password?: string;
   name?: string;
   role?: 'student' | 'teacher' | 'admin';
+  first_name?: string;
+  middle_name?: string;
+  last_name?: string;
+  father_name?: string;
+  mobile_number?: string;
+  confirm_password?: string;
 }
 
 @Injectable({
@@ -44,13 +50,18 @@ export class AuthService {
 
   register(user: User): Observable<any> {
     // Backend register endpoint is /auth/register
-    return this.http.post<any>(`${this.apiUrl}/auth/register`, user);
+    return this.http.post<any>(`${this.apiUrl}/auth/register`, user).pipe(
+      catchError(err => {
+        const msg = err.error?.detail || err.error?.message || 'Registration failed';
+        return throwError(() => new Error(msg));
+      })
+    );
   }
 
   login(user: User): Observable<any> {
     // Backend login endpoint is /auth/login, expecting URL-encoded Form fields
     const body = new HttpParams()
-      .set('username', user.email)
+      .set('username', user.email ?? '')
       .set('password', user.password || '');
 
     const headers = new HttpHeaders({
@@ -64,7 +75,7 @@ export class AuthService {
           localStorage.setItem('edu_token', response.access_token);
           const sessionUser: User = { 
             email: user.email, 
-            name: user.name || user.email.split('@')[0], 
+            name: user.name || (user.email?.split('@')[0] ?? ''), 
             role: response.role 
           };
           localStorage.setItem('edu_user', JSON.stringify(sessionUser));

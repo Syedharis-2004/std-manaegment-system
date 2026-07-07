@@ -17,21 +17,21 @@
 }
 
 .status-alert.authorized {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.2);
-  color: #34d399;
+  background: #ecfdf5;
+  border-color: #d1fae5;
+  color: #065f46;
 }
 
 .status-alert.unauthorized {
-  background: rgba(244, 63, 94, 0.08);
-  border-color: rgba(244, 63, 94, 0.2);
-  color: #fb7185;
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #991b1b;
 }
 
 .status-alert.loading {
-  background: rgba(99, 102, 241, 0.08);
-  border-color: rgba(99, 102, 241, 0.2);
-  color: #818cf8;
+  background: var(--bg-tertiary);
+  border-color: var(--glass-border);
+  color: var(--text-secondary);
 }
 
 .status-indicator {
@@ -39,7 +39,6 @@
   height: 8px;
   border-radius: 50%;
   background-color: currentColor;
-  box-shadow: 0 0 10px currentColor;
 }
 
 /* Metrics Grid */
@@ -64,7 +63,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
 }
 
 .metric-icon-wrapper svg {
@@ -73,21 +72,21 @@
 }
 
 .metric-icon-wrapper.blue {
-  background: var(--accent-primary-glow);
-  color: var(--accent-primary);
-  border-color: rgba(99, 102, 241, 0.25);
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
 }
 
 .metric-icon-wrapper.green {
-  background: var(--accent-success-glow);
-  color: var(--accent-success);
-  border-color: rgba(16, 185, 129, 0.25);
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #d1fae5;
 }
 
 .metric-icon-wrapper.purple {
-  background: var(--accent-secondary-glow);
-  color: var(--accent-secondary);
-  border-color: rgba(168, 85, 247, 0.25);
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-color: #e9d5ff;
 }
 
 .metric-details {
@@ -159,19 +158,19 @@
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
 }
 
 .badge.blue {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-  border-color: rgba(99, 102, 241, 0.3);
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
 }
 
 .badge.rose {
-  background: rgba(244, 63, 94, 0.15);
-  color: #fb7185;
-  border-color: rgba(244, 63, 94, 0.3);
+  background: #ffe4e6;
+  color: #9f1239;
+  border-color: #fecdd3;
 }
 
 /* Tables Manager */
@@ -191,12 +190,12 @@
   padding: 0.75rem 1rem;
   color: var(--text-secondary);
   font-weight: 600;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .admin-table td {
   padding: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--glass-border);
   color: var(--text-primary);
 }
 
@@ -210,7 +209,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,18 +226,18 @@
 }
 
 .role-badge.admin {
-  background: rgba(244, 63, 94, 0.15);
-  color: #fb7185;
+  background: #ffe4e6;
+  color: #9f1239;
 }
 
 .role-badge.teacher {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  background: #f3e8ff;
+  color: #6b21a8;
 }
 
 .role-badge.student {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
 .status-dot {
@@ -252,11 +251,10 @@
 
 .status-dot.active {
   background: var(--accent-success);
-  box-shadow: 0 0 6px var(--accent-success);
 }
 
 .btn-action-sm {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-tertiary);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
   padding: 0.3rem 0.75rem;
@@ -267,9 +265,9 @@
 }
 
 .btn-action-sm:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
 }
 
 /* Activity Logs List */
@@ -283,7 +281,7 @@
 .log-item {
   padding: 0.85rem 1rem;
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;

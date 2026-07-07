@@ -75,14 +75,14 @@
 }
 
 .menu-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-tertiary);
   color: var(--text-primary);
 }
 
 .menu-item.active {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  color: var(--accent-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
 }
 
 .menu-icon {
@@ -109,7 +109,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,7 +117,6 @@
   font-weight: 700;
   color: #ffffff;
   font-size: 0.95rem;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
 }
 
 .user-details {
@@ -141,9 +140,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(244, 63, 94, 0.05);
-  border: 1px solid rgba(244, 63, 94, 0.1);
-  color: #fca5a5;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
   padding: 0.65rem;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
@@ -154,9 +153,9 @@
 }
 
 .btn-logout:hover {
-  background: rgba(244, 63, 94, 0.15);
-  border-color: rgba(244, 63, 94, 0.3);
-  color: #f43f5e;
+  background: #fca5a5;
+  border-color: #ef4444;
+  color: #7f1d1d;
 }
 
 .logout-icon {

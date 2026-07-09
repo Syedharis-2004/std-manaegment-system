@@ -464,3 +464,37 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     width: 100%;
   }
 }
+/* Back to Home Button */
+.back-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border, rgba(30,58,95,0.12));
+  background: rgba(30, 58, 95, 0.04);
+  transition: all 0.25s ease;
+  width: fit-content;
+}
+
+.back-home-btn svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.25s ease;
+}
+
+.back-home-btn:hover {
+  color: var(--accent-primary);
+  background: rgba(30, 58, 95, 0.08);
+  border-color: var(--accent-primary);
+}
+
+.back-home-btn:hover svg {
+  transform: translateX(-3px);
+}
+

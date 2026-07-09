@@ -1,14 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 
 import { LucideGraduationCap, LucideCheckCircle, LucideBookOpen } from '@lucide/angular';
 
 @Component({
   selector: 'app-student-dashboard',
-  imports: [CommonModule, RouterLink, LucideGraduationCap, LucideCheckCircle, LucideBookOpen],
+  imports: [CommonModule, LucideGraduationCap, LucideCheckCircle, LucideBookOpen],
   templateUrl: './student.html',
   styleUrl: './student.css'
 })

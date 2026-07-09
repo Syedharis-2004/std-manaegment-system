@@ -1,22 +1,29 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth';
 
 import { LucideGraduationCap, LucideCheckCircle, LucideBookOpen } from '@lucide/angular';
 
 @Component({
   selector: 'app-student-dashboard',
-  imports: [CommonModule, LucideGraduationCap, LucideCheckCircle, LucideBookOpen],
+  imports: [CommonModule, RouterLink, LucideGraduationCap, LucideCheckCircle, LucideBookOpen],
   templateUrl: './student.html',
   styleUrl: './student.css'
 })
 export class StudentDashboard implements OnInit {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
+  private router = inject(Router);
   private apiUrl = 'http://localhost:8000';
 
   backendMessage = signal<string>('Verifying student access...');
   isAuthorized = signal<boolean>(false);
   isLoading = signal<boolean>(true);
+
+  // Admission reminder modal
+  showAdmissionModal = signal<boolean>(false);
 
   // Simulated premium interactive student metrics
   gpa = signal<number>(3.82);
@@ -43,6 +50,8 @@ export class StudentDashboard implements OnInit {
         this.backendMessage.set(res.message || 'Access granted!');
         this.isAuthorized.set(true);
         this.isLoading.set(false);
+        // After auth passes, check admission status
+        this.checkAdmissionStatus();
       },
       error: (err) => {
         this.backendMessage.set(err.error?.detail || 'Unauthorized student access!');
@@ -51,4 +60,28 @@ export class StudentDashboard implements OnInit {
       }
     });
   }
+
+  checkAdmissionStatus(): void {
+    this.authService.getMe().subscribe({
+      next: (profile) => {
+        // Show modal only if student has NOT yet submitted admission form
+        if (profile?.admission_status === 'NOT_SUBMITTED') {
+          this.showAdmissionModal.set(true);
+        }
+      },
+      error: () => {
+        // Silently fail — don't block dashboard
+      }
+    });
+  }
+
+  goToAdmissionForm(): void {
+    this.showAdmissionModal.set(false);
+    this.router.navigate(['/admission']);
+  }
+
+  dismissModal(): void {
+    this.showAdmissionModal.set(false);
+  }
 }
+

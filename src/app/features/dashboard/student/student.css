@@ -397,3 +397,175 @@
   color: #ffffff;
   border-color: var(--accent-primary);
 }
+
+/* ============================================
+   Admission Reminder Modal
+   ============================================ */
+.admission-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 35, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeOverlay 0.3s ease-out;
+}
+
+.admission-modal-card {
+  width: 90%;
+  max-width: 460px;
+  background: var(--bg-secondary, #131e2e);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.5);
+  animation: slideUpModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.modal-icon-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(30,58,95,0.3) 0%, rgba(47,128,237,0.15) 100%);
+  border: 1px solid rgba(47, 128, 237, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary, #2f80ed);
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+.modal-icon-ring svg {
+  width: 36px;
+  height: 36px;
+}
+
+.modal-headline {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f6ff);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.modal-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 360px;
+}
+
+.modal-description strong {
+  color: var(--accent-primary, #2f80ed);
+}
+
+/* Progress bar */
+.modal-progress-bar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.modal-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.modal-progress-fill {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary, #2f80ed), var(--accent-secondary, #60a5fa));
+  border-radius: 999px;
+  animation: growFill 0.8s ease-out 0.4s both;
+}
+
+.modal-progress-label {
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
+
+/* Action Buttons */
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.btn-modal-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent-primary, #2f80ed) 0%, var(--accent-secondary, #1e3a5f) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(47, 128, 237, 0.25);
+}
+
+.btn-modal-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(47, 128, 237, 0.35);
+}
+
+.btn-modal-secondary {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-modal-secondary:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary, #f0f6ff);
+}
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from { transform: translateY(30px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(47, 128, 237, 0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(47, 128, 237, 0); }
+}
+
+@keyframes growFill {
+  from { width: 0%; }
+  to { width: 50%; }
+}
+

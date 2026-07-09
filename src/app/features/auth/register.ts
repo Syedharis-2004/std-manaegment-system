@@ -30,6 +30,7 @@ export class Register {
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  showErrorModal = signal(false);
 
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
@@ -45,6 +46,10 @@ export class Register {
       confirmPassword.setErrors(null);
     }
     return null;
+  }
+
+  closeErrorModal(): void {
+    this.showErrorModal.set(false);
   }
 
   onSubmit(): void {
@@ -79,11 +84,14 @@ export class Register {
           }, 1800);
         } else {
           this.errorMessage.set(response.message || 'Mobile number or email already exists.');
+          this.showErrorModal.set(true);
         }
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.detail || err.error?.message || 'Failed to register. Please try again.');
+        const errMsg = err.message || 'Failed to register. Please try again.';
+        this.errorMessage.set(errMsg);
+        this.showErrorModal.set(true);
       }
     });
   }

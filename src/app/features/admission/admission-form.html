@@ -20,6 +20,14 @@
       <span>{{ successMessage }}</span>
     </div>
 
+    <!-- Alert / Error Message -->
+    <div *ngIf="errorMessage" class="alert error-alert fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="alert-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+
     <form [formGroup]="admissionForm" (ngSubmit)="onSubmit()" class="admission-form">
       
       <!-- Section 1: Personal Details -->
@@ -174,8 +182,8 @@
 
             <!-- Doc 3: Result Card -->
             <div class="upload-item">
-              <span class="upload-label">Last Admit Card / Result Card Copy</span>
-              <div class="upload-box-wrapper" (click)="resultCardUpload.click()">
+              <span class="upload-label">Last Admit Card / Result Card Copy *</span>
+              <div class="upload-box-wrapper" [class.border-error]="admissionForm.get('docsResultCard')?.invalid && (admissionForm.get('docsResultCard')?.touched || isSubmitted)" (click)="resultCardUpload.click()">
                 <input type="file" #resultCardUpload (change)="onFileSelected($event, 'docsResultCard')" style="display: none;" accept="image/*,.pdf">
                 <div class="upload-box-content">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsResultCard')">
@@ -187,6 +195,49 @@
                   <span class="upload-text">{{ getFileName('docsResultCard') || 'Choose Result Card (Image/PDF)' }}</span>
                 </div>
               </div>
+              <span class="error-text" *ngIf="admissionForm.get('docsResultCard')?.invalid && (admissionForm.get('docsResultCard')?.touched || isSubmitted)">
+                Result card is required
+              </span>
+            </div>
+
+            <!-- Doc 4: B-Form -->
+            <div class="upload-item">
+              <span class="upload-label">B-Form / Birth Certificate Copy *</span>
+              <div class="upload-box-wrapper" [class.border-error]="admissionForm.get('docsBForm')?.invalid && (admissionForm.get('docsBForm')?.touched || isSubmitted)" (click)="bFormUpload.click()">
+                <input type="file" #bFormUpload (change)="onFileSelected($event, 'docsBForm')" style="display: none;" accept="image/*,.pdf">
+                <div class="upload-box-content">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsBForm')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-success" *ngIf="getFileName('docsBForm')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="upload-text">{{ getFileName('docsBForm') || 'Choose B-Form Copy (Image/PDF)' }}</span>
+                </div>
+              </div>
+              <span class="error-text" *ngIf="admissionForm.get('docsBForm')?.invalid && (admissionForm.get('docsBForm')?.touched || isSubmitted)">
+                B-Form copy is required
+              </span>
+            </div>
+
+            <!-- Doc 5: Character Certificate -->
+            <div class="upload-item">
+              <span class="upload-label">Character Certificate Copy *</span>
+              <div class="upload-box-wrapper" [class.border-error]="admissionForm.get('docsCharacterCertificate')?.invalid && (admissionForm.get('docsCharacterCertificate')?.touched || isSubmitted)" (click)="charCertUpload.click()">
+                <input type="file" #charCertUpload (change)="onFileSelected($event, 'docsCharacterCertificate')" style="display: none;" accept="image/*,.pdf">
+                <div class="upload-box-content">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon" *ngIf="!getFileName('docsCharacterCertificate')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="upload-icon-success" *ngIf="getFileName('docsCharacterCertificate')">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="upload-text">{{ getFileName('docsCharacterCertificate') || 'Choose Character Certificate (Image/PDF)' }}</span>
+                </div>
+              </div>
+              <span class="error-text" *ngIf="admissionForm.get('docsCharacterCertificate')?.invalid && (admissionForm.get('docsCharacterCertificate')?.touched || isSubmitted)">
+                Character certificate is required
+              </span>
             </div>
           </div>
         </div>

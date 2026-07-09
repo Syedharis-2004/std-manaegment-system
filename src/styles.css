@@ -133,7 +133,7 @@ button:focus-visible,
   bottom: 0;
   width: 4px;
   background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
-  opacity: 0;
+  opacity: 0.45;
   transition: var(--transition-smooth);
 }
 

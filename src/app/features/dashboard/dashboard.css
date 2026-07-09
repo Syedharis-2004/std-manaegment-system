@@ -61,10 +61,10 @@
   align-items: center;
   gap: 1rem;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--text-secondary);
   padding: 0.85rem 1rem;
-  border-radius: var(--border-radius-sm);
+  border-radius: 12px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.95rem;
@@ -75,19 +75,21 @@
 }
 
 .menu-item:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: rgba(47, 128, 237, 0.04);
+  color: var(--accent-secondary);
+  transform: translateX(4px);
 }
 
 .menu-item.active {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  background: rgba(47, 128, 237, 0.08);
+  border-color: rgba(47, 128, 237, 0.15);
+  color: var(--accent-secondary);
+  font-weight: 600;
 }
 
 .menu-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -109,7 +111,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--accent-primary);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,6 +119,7 @@
   font-weight: 700;
   color: #ffffff;
   font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(30, 58, 95, 0.15);
 }
 
 .user-details {
@@ -140,11 +143,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 0.65rem;
-  border-radius: var(--border-radius-sm);
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: var(--accent-danger);
+  padding: 0.75rem;
+  border-radius: 12px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 0.9rem;
@@ -153,9 +156,11 @@
 }
 
 .btn-logout:hover {
-  background: #fca5a5;
-  border-color: #ef4444;
-  color: #7f1d1d;
+  background: var(--accent-danger);
+  border-color: var(--accent-danger);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 .logout-icon {

@@ -5,10 +5,39 @@ import { AuthService } from '../../core/services/auth';
 import { StudentDashboard } from './student/student';
 import { TeacherDashboard } from './teacher/teacher';
 import { AdminDashboard } from './admin/admin';
+import {
+  LucideHouse,
+  LucideBookOpen,
+  LucideFileText,
+  LucideAward,
+  LucidePresentation,
+  LucideCheckSquare,
+  LucideUsers,
+  LucideUserCheck,
+  LucideGraduationCap,
+  LucideSettings,
+  LucideLogOut
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, StudentDashboard, TeacherDashboard, AdminDashboard],
+  imports: [
+    CommonModule,
+    StudentDashboard,
+    TeacherDashboard,
+    AdminDashboard,
+    LucideHouse,
+    LucideBookOpen,
+    LucideFileText,
+    LucideAward,
+    LucidePresentation,
+    LucideCheckSquare,
+    LucideUsers,
+    LucideUserCheck,
+    LucideGraduationCap,
+    LucideSettings,
+    LucideLogOut
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })

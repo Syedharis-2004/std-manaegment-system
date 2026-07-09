@@ -2,9 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
+import { LucideBookOpen, LucideEdit, LucideStar } from '@lucide/angular';
+
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, LucideBookOpen, LucideEdit, LucideStar],
   templateUrl: './teacher.html',
   styleUrl: './teacher.css'
 })

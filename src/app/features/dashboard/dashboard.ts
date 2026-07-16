@@ -7,16 +7,20 @@ import { TeacherDashboard } from './teacher/teacher';
 import { AdminDashboard } from './admin/admin';
 import {
   LucideHouse,
-  LucideBookOpen,
-  LucideFileText,
-  LucideAward,
   LucidePresentation,
   LucideCheckSquare,
   LucideUsers,
   LucideUserCheck,
-  LucideGraduationCap,
-  LucideSettings,
-  LucideLogOut
+  LucideLogOut,
+  LucideLayoutDashboard,
+  LucideSchool,
+  LucideCreditCard,
+  LucideBell,
+  LucideClipboardList,
+  LucideChevronDown,
+  LucideChevronRight,
+  LucideUserCog,
+  LucideUpload
 } from '@lucide/angular';
 
 @Component({
@@ -27,16 +31,20 @@ import {
     TeacherDashboard,
     AdminDashboard,
     LucideHouse,
-    LucideBookOpen,
-    LucideFileText,
-    LucideAward,
     LucidePresentation,
     LucideCheckSquare,
     LucideUsers,
     LucideUserCheck,
-    LucideGraduationCap,
-    LucideSettings,
-    LucideLogOut
+    LucideLogOut,
+    LucideLayoutDashboard,
+    LucideSchool,
+    LucideCreditCard,
+    LucideBell,
+    LucideClipboardList,
+    LucideChevronDown,
+    LucideChevronRight,
+    LucideUserCog,
+    LucideUpload
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -49,6 +57,13 @@ export class Dashboard implements OnInit {
   toastMessage = signal<string | null>(null);
   toastType = signal<'success' | 'error'>('success');
 
+  // Student active page state
+  studentActivePage = signal<string>('dashboard');
+  classMenuOpen = signal<boolean>(false);
+
+  // Admin active page state
+  adminActivePage = signal<string>('dashboard');
+
   // Computed signals for user profile info
   currentUser = computed(() => this.authService.currentUser());
   userRole = computed(() => this.currentUser()?.role || 'student');
@@ -57,6 +72,24 @@ export class Dashboard implements OnInit {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
+    }
+  }
+
+  navigateStudent(page: string): void {
+    this.studentActivePage.set(page);
+    if (page !== 'class' && page !== 'class-detail') {
+      this.classMenuOpen.set(false);
+    }
+  }
+
+  navigateAdmin(page: string): void {
+    this.adminActivePage.set(page);
+  }
+
+  toggleClassMenu(): void {
+    this.classMenuOpen.update(v => !v);
+    if (this.classMenuOpen()) {
+      this.studentActivePage.set('class');
     }
   }
 

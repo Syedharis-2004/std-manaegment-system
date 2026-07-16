@@ -1,11 +1,5 @@
-<div class="teacher-dashboard fade-in">
+<div class="teacher-dashboard">
   
-  <!-- Backend Authorization Status Alert -->
-  <div class="glass-card status-alert" [class.authorized]="isAuthorized()" [class.loading]="isLoading()" [class.unauthorized]="!isLoading() && !isAuthorized()">
-    <div class="status-indicator"></div>
-    <span class="status-text">{{ backendMessage() }}</span>
-  </div>
-
   <div *ngIf="isAuthorized()">
     <!-- Metrics Grid -->
     <div class="metrics-grid">

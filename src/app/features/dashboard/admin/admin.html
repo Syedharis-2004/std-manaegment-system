@@ -1,177 +1,133 @@
-<div class="admin-dashboard fade-in">
-  
-  <!-- Backend Authorization Status Alert -->
-  <div class="glass-card status-alert" [class.authorized]="isAuthorized()" [class.loading]="isLoading()" [class.unauthorized]="!isLoading() && !isAuthorized()">
-    <div class="status-indicator"></div>
-    <span class="status-text">{{ backendMessage() }}</span>
-  </div>
+<div class="admin-dashboard">
 
   @if (isAuthorized()) {
-    <!-- Metrics Grid -->
-    <div class="metrics-grid">
-      <!-- Total Users -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper blue">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766zM16.5 12.75a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0zM8.25 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-          </svg>
+
+    <!-- ===================== DASHBOARD PAGE ===================== -->
+    <div *ngIf="activePage() === 'dashboard'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">System overview at a glance</p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper blue">
+            <svg lucideUsers></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Total Students</span>
+            <h2 class="metric-value">{{ students().length }}</h2>
+          </div>
         </div>
-        <div class="metric-details">
-          <span class="metric-label">System Accounts</span>
-          <h2 class="metric-value">{{ totalUsers() }}</h2>
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper purple">
+            <svg lucideUserCheck></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Teachers</span>
+            <h2 class="metric-value">{{ teachers().length }}</h2>
+          </div>
+        </div>
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper green">
+            <svg lucideSchool></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Active Classes</span>
+            <h2 class="metric-value">{{ classes().length }}</h2>
+          </div>
+        </div>
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper orange">
+            <svg lucideCreditCard></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Fee Overdue</span>
+            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Overdue').length }}</h2>
+          </div>
         </div>
       </div>
 
-      <!-- Active Sessions -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper purple">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-          </svg>
-        </div>
-        <div class="metric-details">
-          <span class="metric-label">Active Connections</span>
-          <h2 class="metric-value">{{ activeSessions() }}</h2>
-        </div>
-      </div>
-
-      <!-- Server Health -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper green">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12.75l3.75-3.75 4.5 4.5 4.5-6 4.5 4.5" />
-          </svg>
-        </div>
-        <div class="metric-details">
-          <span class="metric-label">System Core Health</span>
-          <h2 class="metric-value">{{ serverHealth() }}</h2>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pending Admissions Manager -->
-    <div class="glass-card full-width-card" style="margin-bottom: 2rem;">
-      <div class="card-title-bar">
-        <h3>Pending Admissions Queue</h3>
-        <span class="badge warning">{{ pendingAdmissions().length }} Pending</span>
-      </div>
-      
-      @if (pendingAdmissions().length === 0) {
-        <div class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="empty-icon" style="width: 3rem; height: 3rem; color: #a1a1aa; margin-bottom: 0.5rem;">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12z" />
-          </svg>
-          <p style="color: #a1a1aa; font-size: 0.95rem;">No pending admission applications at this time.</p>
-        </div>
-      } @else {
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Contact Info</th>
-                <th>Academic Choice</th>
-                <th>Documents Uploaded</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (admission of pendingAdmissions(); track admission.user_id) {
-                <tr>
-                  <td>
-                    <div class="student-profile-cell">
-                      <span class="student-name" style="font-weight: 600; color: #ffffff; display: block;">{{ admission.first_name }} {{ admission.middle_name || '' }} {{ admission.last_name }}</span>
-                      <span class="student-father" style="font-size: 0.8rem; color: #a1a1aa;">S/O: {{ admission.father_name }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="contact-cell" style="display: flex; flex-direction: column;">
-                      <span class="contact-email" style="color: #cbd5e1; font-size: 0.9rem;">{{ admission.email || 'N/A' }}</span>
-                      <span class="contact-whatsapp" style="font-size: 0.8rem; color: #a1a1aa;">WhatsApp: {{ admission.whatsapp }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="academic-cell" style="display: flex; flex-direction: column;">
-                      <span class="academic-class" style="color: #cbd5e1; font-size: 0.9rem;">Class: {{ admission.class_name }}</span>
-                      <span class="academic-dept" style="font-size: 0.8rem; color: var(--accent-blue, #60a5fa);">Dept: {{ admission.department }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="docs-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; max-width: 320px;">
-                      <span class="doc-file-tag" [title]="admission.photo">🖼️ Photo</span>
-                      <span class="doc-file-tag" [title]="admission.b_form">📄 B-Form</span>
-                      <span class="doc-file-tag" [title]="admission.father_cnic">🪪 CNIC</span>
-                      <span class="doc-file-tag" [title]="admission.last_result_card">📊 Result</span>
-                      <span class="doc-file-tag" [title]="admission.character_certificate">📜 Character</span>
-                    </div>
-                  </td>
-                  <td>
-                    <button class="btn-approve" (click)="approveAdmission(admission.user_id)">
-                      Approve
-                    </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-
-    <!-- Layout Columns -->
-    <div class="dashboard-columns-grid">
-      
-      <!-- Users Manager -->
-      <div class="glass-card column-card span-two">
+      <!-- Pending Admissions -->
+      <div class="glass-card full-width-card" style="margin-top:2rem;">
         <div class="card-title-bar">
-          <h3>User Directory Controls</h3>
-          <span class="badge blue">Database Records</span>
+          <h3>Pending Admissions Queue</h3>
+          <span class="badge warning">{{ pendingAdmissions().length }} Pending</span>
         </div>
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>User Identity</th>
-                <th>Registered Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (user of users(); track user.email; let idx = $index) {
+        @if (pendingAdmissions().length === 0) {
+          <div class="empty-state">
+            <svg lucideCheckCircle style="width:2.5rem;height:2.5rem;color:#10b981;margin-bottom:.5rem"></svg>
+            <p style="color:#a1a1aa;font-size:.95rem">No pending admission applications at this time.</p>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
                 <tr>
-                  <td>
-                    <div class="avatar-cell">
-                      <div class="user-avatar-sm">{{ user.name.substring(0,2).toUpperCase() }}</div>
-                      <span>{{ user.name }}</span>
-                    </div>
-                  </td>
-                  <td>{{ user.email }}</td>
-                  <td>
-                    <span class="role-badge" [class]="user.role">{{ user.role | uppercase }}</span>
-                  </td>
-                  <td>
-                    <span class="status-dot" [class.active]="user.status === 'active'"></span>
-                    {{ user.status | titlecase }}
-                  </td>
-                  <td>
-                    <button class="btn-action-sm" (click)="toggleUserStatus(idx)">
-                      {{ user.status === 'active' ? 'Suspend' : 'Activate' }}
-                    </button>
-                  </td>
+                  <th>Student</th>
+                  <th>Contact Info</th>
+                  <th>Academic Choice</th>
+                  <th>Documents</th>
+                  <th>Actions</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                @for (a of pendingAdmissions(); track a.user_id) {
+                  <tr>
+                    <td>
+                      <div class="student-profile-cell">
+                        <div class="user-avatar-sm">{{ a.first_name?.charAt(0) }}{{ a.last_name?.charAt(0) }}</div>
+                        <div>
+                          <span class="adm-name">{{ a.first_name }} {{ a.middle_name || '' }} {{ a.last_name }}</span>
+                          <span class="adm-father">S/O: {{ a.father_name }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="adm-contact">
+                        <span class="adm-email">{{ a.email || 'N/A' }}</span>
+                        <span class="adm-phone">📱 {{ a.whatsapp }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="adm-academic">
+                        <span class="adm-class">{{ a.class_name }}</span>
+                        <span class="adm-dept">{{ a.department }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="adm-docs">
+                        <span class="doc-tag" [title]="a.photo">🖼️ Photo</span>
+                        <span class="doc-tag" [title]="a.b_form">📄 B-Form</span>
+                        <span class="doc-tag" [title]="a.father_cnic">🪪 CNIC</span>
+                        <span class="doc-tag" [title]="a.last_result_card">📊 Result</span>
+                        <span class="doc-tag" [title]="a.character_certificate">📜 Character</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="adm-actions">
+                        <button class="btn-approve" (click)="approveAdmission(a.user_id)">
+                          ✓ Approve
+                        </button>
+                        <button class="btn-reject" (click)="rejectAdmission(a.user_id)">
+                          ✕ Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
 
-      <!-- Logs Monitor -->
-      <div class="glass-card column-card">
+
+      <!-- System Logs -->
+      <div class="glass-card full-width-card" style="margin-top:1.5rem;">
         <div class="card-title-bar">
           <h3>Portal Activity Logs</h3>
-          <span class="badge rose">Realtime Audit</span>
+          <span class="badge rose">Realtime</span>
         </div>
         <div class="log-list">
           @for (log of systemLogs(); track log.event) {
@@ -185,14 +141,359 @@
           }
         </div>
       </div>
-
     </div>
+
+    <!-- ===================== STUDENTS PAGE ===================== -->
+    <div *ngIf="activePage() === 'students'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Students</h1>
+        <p class="page-subtitle">All enrolled students</p>
+      </div>
+      <div class="glass-card full-width-card">
+        <div class="card-title-bar">
+          <h3>Student Directory</h3>
+          <span class="badge blue">{{ students().length }} Records</span>
+        </div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of students(); track s.id) {
+                <tr>
+                  <td><span class="code-chip">{{ s.id }}</span></td>
+                  <td>
+                    <div class="avatar-cell">
+                      <div class="user-avatar-sm">{{ s.name.substring(0,2).toUpperCase() }}</div>
+                      <span>{{ s.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ s.email }}</td>
+                  <td><span class="code-chip">{{ s.class }}</span></td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="s.status === 'active'"
+                      [class.overdue]="s.status === 'inactive'">
+                      {{ s.status | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="s.fee === 'Paid'"
+                      [class.partial]="s.fee === 'Pending'"
+                      [class.overdue]="s.fee === 'Overdue'">
+                      {{ s.fee }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TEACHERS PAGE ===================== -->
+    <div *ngIf="activePage() === 'teachers'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Teachers</h1>
+        <p class="page-subtitle">Faculty directory and attendance status</p>
+      </div>
+      <div class="glass-card full-width-card">
+        <div class="card-title-bar">
+          <h3>Teacher Directory</h3>
+          <span class="badge purple">{{ teachers().length }} Faculty</span>
+        </div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Today</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of teachers(); track t.id) {
+                <tr>
+                  <td><span class="code-chip">{{ t.id }}</span></td>
+                  <td>
+                    <div class="avatar-cell">
+                      <div class="user-avatar-sm">{{ t.name.substring(0,2).toUpperCase() }}</div>
+                      <span>{{ t.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ t.subject }}</td>
+                  <td>{{ t.email }}</td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="t.status === 'active'"
+                      [class.overdue]="t.status === 'on-leave'">
+                      {{ t.status | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="t.todayPresent"
+                      [class.overdue]="!t.todayPresent">
+                      {{ t.todayPresent ? 'Present' : 'Absent' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== STAFF PAGE ===================== -->
+    <div *ngIf="activePage() === 'staff'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Staff</h1>
+        <p class="page-subtitle">Non-teaching staff directory</p>
+      </div>
+      <div class="glass-card full-width-card">
+        <div class="card-title-bar">
+          <h3>Staff Directory</h3>
+          <span class="badge green">{{ staff().length }} Members</span>
+        </div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (m of staff(); track m.id) {
+                <tr>
+                  <td><span class="code-chip">{{ m.id }}</span></td>
+                  <td>
+                    <div class="avatar-cell">
+                      <div class="user-avatar-sm">{{ m.name.substring(0,2).toUpperCase() }}</div>
+                      <span>{{ m.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ m.role }}</td>
+                  <td>{{ m.email }}</td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="m.status === 'active'"
+                      [class.overdue]="m.status === 'inactive'">
+                      {{ m.status | titlecase }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CLASS PAGE ===================== -->
+    <div *ngIf="activePage() === 'class'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Classes</h1>
+        <p class="page-subtitle">All active class sections</p>
+      </div>
+      <div class="glass-card full-width-card">
+        <div class="card-title-bar">
+          <h3>Class Directory</h3>
+          <span class="badge blue">{{ classes().length }} Sections</span>
+        </div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Class ID</th><th>Program</th><th>Semester</th><th>Students</th><th>Class Teacher</th><th>Room</th></tr>
+            </thead>
+            <tbody>
+              @for (c of classes(); track c.id) {
+                <tr>
+                  <td><span class="code-chip">{{ c.id }}</span></td>
+                  <td>{{ c.program }}</td>
+                  <td>{{ c.semester }}</td>
+                  <td>{{ c.students }}</td>
+                  <td>{{ c.teacher }}</td>
+                  <td><span class="code-chip">{{ c.room }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FEE PAGE ===================== -->
+    <div *ngIf="activePage() === 'fee'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Fee</h1>
+        <p class="page-subtitle">Fee collection and status overview</p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper green">
+            <svg lucideCheckCircle></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Fully Paid</span>
+            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Paid').length }}</h2>
+          </div>
+        </div>
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper orange">
+            <svg lucideCreditCard></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Pending</span>
+            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Pending').length }}</h2>
+          </div>
+        </div>
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper red">
+            <svg lucideXCircle></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Overdue</span>
+            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Overdue').length }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card full-width-card" style="margin-top:2rem;">
+        <div class="card-title-bar">
+          <h3>Fee Records</h3>
+          <span class="badge blue">Spring 2026</span>
+        </div>
+        <div class="table-container">
+          <table class="admin-table">
+            <thead>
+              <tr><th>ID</th><th>Student</th><th>Class</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th><th>Due Date</th></tr>
+            </thead>
+            <tbody>
+              @for (f of feeRecords(); track f.id) {
+                <tr>
+                  <td><span class="code-chip">{{ f.id }}</span></td>
+                  <td>{{ f.name }}</td>
+                  <td><span class="code-chip">{{ f.class }}</span></td>
+                  <td>PKR {{ f.amount | number }}</td>
+                  <td class="fee-paid-cell">PKR {{ f.paid | number }}</td>
+                  <td class="fee-due-cell">PKR {{ f.due | number }}</td>
+                  <td>
+                    <span class="status-pill"
+                      [class.ongoing]="f.status === 'Paid'"
+                      [class.partial]="f.status === 'Pending'"
+                      [class.overdue]="f.status === 'Overdue'">
+                      {{ f.status }}
+                    </span>
+                  </td>
+                  <td>{{ f.dueDate }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== UPLOAD DATA PAGE ===================== -->
+    <div *ngIf="activePage() === 'upload'" class="page-section">
+      <div class="page-welcome">
+        <h1 class="page-title">Upload Data</h1>
+        <p class="page-subtitle">Bulk import records via CSV or Excel</p>
+      </div>
+
+      <div class="upload-grid">
+        <div class="glass-card upload-card">
+          <div class="upload-icon-wrapper">
+            <svg lucideUpload style="width:2rem;height:2rem;color:var(--accent-secondary)"></svg>
+          </div>
+          <h3 class="upload-card-title">Upload Students</h3>
+          <p class="upload-card-desc">Import student records from a .csv or .xlsx file</p>
+          <label class="upload-file-label" for="upload-students">
+            <svg lucideSearch style="width:1rem;height:1rem"></svg>
+            Choose File
+          </label>
+          <input type="file" id="upload-students" accept=".csv,.xlsx" style="display:none">
+          <button class="btn-upload">Upload</button>
+        </div>
+
+        <div class="glass-card upload-card">
+          <div class="upload-icon-wrapper">
+            <svg lucideUpload style="width:2rem;height:2rem;color:var(--accent-secondary)"></svg>
+          </div>
+          <h3 class="upload-card-title">Upload Teachers</h3>
+          <p class="upload-card-desc">Import teacher and subject assignments from a file</p>
+          <label class="upload-file-label" for="upload-teachers">
+            <svg lucideSearch style="width:1rem;height:1rem"></svg>
+            Choose File
+          </label>
+          <input type="file" id="upload-teachers" accept=".csv,.xlsx" style="display:none">
+          <button class="btn-upload">Upload</button>
+        </div>
+
+        <div class="glass-card upload-card">
+          <div class="upload-icon-wrapper">
+            <svg lucideUpload style="width:2rem;height:2rem;color:var(--accent-secondary)"></svg>
+          </div>
+          <h3 class="upload-card-title">Upload Staff</h3>
+          <p class="upload-card-desc">Import non-teaching staff roster data</p>
+          <label class="upload-file-label" for="upload-staff">
+            <svg lucideSearch style="width:1rem;height:1rem"></svg>
+            Choose File
+          </label>
+          <input type="file" id="upload-staff" accept=".csv,.xlsx" style="display:none">
+          <button class="btn-upload">Upload</button>
+        </div>
+
+        <div class="glass-card upload-card">
+          <div class="upload-icon-wrapper">
+            <svg lucideUpload style="width:2rem;height:2rem;color:var(--accent-secondary)"></svg>
+          </div>
+          <h3 class="upload-card-title">Upload Fee Data</h3>
+          <p class="upload-card-desc">Bulk import semester fee records and payment info</p>
+          <label class="upload-file-label" for="upload-fee">
+            <svg lucideSearch style="width:1rem;height:1rem"></svg>
+            Choose File
+          </label>
+          <input type="file" id="upload-fee" accept=".csv,.xlsx" style="display:none">
+          <button class="btn-upload">Upload</button>
+        </div>
+      </div>
+
+      <div class="glass-card full-width-card" style="margin-top:2rem;">
+        <div class="card-title-bar">
+          <h3>Upload Guidelines</h3>
+        </div>
+        <ul class="upload-guidelines">
+          <li>Files must be in <strong>.csv</strong> or <strong>.xlsx</strong> format</li>
+          <li>Maximum file size: <strong>5 MB</strong></li>
+          <li>The first row must be the column headers</li>
+          <li>Required columns for students: <code>id, name, email, class, status</code></li>
+          <li>Required columns for teachers: <code>id, name, subject, email, status</code></li>
+          <li>All IDs must be unique — duplicate records will be skipped</li>
+        </ul>
+      </div>
+    </div>
+
   }
 
-  <!-- Toast Notification System -->
+  <!-- Toast -->
   <div class="toast-container" *ngIf="toastMessage()">
     <div class="toast success">
       <span class="toast-text">{{ toastMessage() }}</span>
     </div>
   </div>
+
 </div>

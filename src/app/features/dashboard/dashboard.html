@@ -10,29 +10,64 @@
     </div>
 
     <nav class="sidebar-menu">
-      <button class="menu-item active">
-        <svg lucideHouse class="menu-icon"></svg>
-        <span>Portal Home</span>
-      </button>
 
       <!-- Student Menu -->
       <ng-container *ngIf="userRole() === 'student'">
-        <button class="menu-item">
-          <svg lucideBookOpen class="menu-icon"></svg>
-          <span>Enrolled Courses</span>
+
+        <!-- Dashboard -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'dashboard'"
+          (click)="navigateStudent('dashboard')">
+          <svg lucideLayoutDashboard class="menu-icon"></svg>
+          <span>Dashboard</span>
         </button>
-        <button class="menu-item">
-          <svg lucideFileText class="menu-icon"></svg>
+
+        <!-- Class (with sub-menu) -->
+        <button class="menu-item" [class.active]="classMenuOpen() || studentActivePage() === 'class' || studentActivePage() === 'class-detail'"
+          (click)="toggleClassMenu()">
+          <svg lucideSchool class="menu-icon"></svg>
+          <span>Class</span>
+          <svg *ngIf="classMenuOpen()" lucideChevronDown class="menu-chevron"></svg>
+          <svg *ngIf="!classMenuOpen()" lucideChevronRight class="menu-chevron"></svg>
+        </button>
+
+        <!-- Class Sub-items -->
+        <div class="submenu" [class.open]="classMenuOpen()">
+          <button class="menu-item submenu-item" [class.active]="studentActivePage() === 'class-detail'"
+            (click)="navigateStudent('class-detail')">
+            <span class="submenu-dot"></span>
+            <span>Class Detail</span>
+          </button>
+        </div>
+
+        <!-- Fee History -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'fee-history'"
+          (click)="navigateStudent('fee-history')">
+          <svg lucideCreditCard class="menu-icon"></svg>
+          <span>Fee History</span>
+        </button>
+
+        <!-- Notice -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'notice'"
+          (click)="navigateStudent('notice')">
+          <svg lucideBell class="menu-icon"></svg>
+          <span>Notice</span>
+        </button>
+
+        <!-- Assignments -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'assignments'"
+          (click)="navigateStudent('assignments')">
+          <svg lucideClipboardList class="menu-icon"></svg>
           <span>Assignments</span>
         </button>
-        <button class="menu-item">
-          <svg lucideAward class="menu-icon"></svg>
-          <span>Grades & CGPA</span>
-        </button>
+
       </ng-container>
 
       <!-- Teacher Menu -->
       <ng-container *ngIf="userRole() === 'teacher'">
+        <button class="menu-item active">
+          <svg lucideHouse class="menu-icon"></svg>
+          <span>Portal Home</span>
+        </button>
         <button class="menu-item">
           <svg lucidePresentation class="menu-icon"></svg>
           <span>My Classes</span>
@@ -49,36 +84,40 @@
 
       <!-- Admin Menu -->
       <ng-container *ngIf="userRole() === 'admin'">
-        <button class="menu-item">
+        <button class="menu-item" [class.active]="adminActivePage() === 'dashboard'" (click)="navigateAdmin('dashboard')">
+          <svg lucideLayoutDashboard class="menu-icon"></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'students'" (click)="navigateAdmin('students')">
+          <svg lucideUsers class="menu-icon"></svg>
+          <span>Students</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'teachers'" (click)="navigateAdmin('teachers')">
           <svg lucideUserCheck class="menu-icon"></svg>
-          <span>User Control</span>
+          <span>Teachers</span>
         </button>
-        <button class="menu-item">
-          <svg lucideGraduationCap class="menu-icon"></svg>
-          <span>Course Management</span>
+        <button class="menu-item" [class.active]="adminActivePage() === 'staff'" (click)="navigateAdmin('staff')">
+          <svg lucideUserCog class="menu-icon"></svg>
+          <span>Staff</span>
         </button>
-        <button class="menu-item">
-          <svg lucideSettings class="menu-icon"></svg>
-          <span>System Settings</span>
+        <button class="menu-item" [class.active]="adminActivePage() === 'class'" (click)="navigateAdmin('class')">
+          <svg lucideSchool class="menu-icon"></svg>
+          <span>Class</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'fee'" (click)="navigateAdmin('fee')">
+          <svg lucideCreditCard class="menu-icon"></svg>
+          <span>Fee</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'upload'" (click)="navigateAdmin('upload')">
+          <svg lucideUpload class="menu-icon"></svg>
+          <span>Upload Data</span>
         </button>
       </ng-container>
     </nav>
 
-    <!-- User Profile & Logout -->
+    <!-- Sidebar Footer (role badge only) -->
     <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          {{ currentUser()?.name?.substring(0, 2)?.toUpperCase() || 'US' }}
-        </div>
-        <div class="user-details">
-          <span class="user-name">{{ currentUser()?.name || 'User Profile' }}</span>
-          <span class="user-role">{{ userRole() | uppercase }}</span>
-        </div>
-      </div>
-      <button class="btn-logout" (click)="logout()" title="Logout">
-        <svg lucideLogOut class="logout-icon"></svg>
-        <span>Logout</span>
-      </button>
+      <span class="sidebar-role-badge">{{ userRole() | uppercase }}</span>
     </div>
   </aside>
 
@@ -88,18 +127,37 @@
     <!-- Top Header Bar -->
     <header class="content-header">
       <div class="header-left">
-        <h1 class="page-title">
-          {{ userRole() | titlecase }} Portal
+        <h1 class="page-title" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 0;">
+          Welcome back, {{ currentUser()?.name }}!
         </h1>
-        <p class="header-greeting">Welcome back, {{ currentUser()?.name }}! Managing your academic dashboard.</p>
+      </div>
+
+      <!-- Top-Right: User Profile + Logout -->
+      <div class="header-user-area">
+        <div class="header-user-chip">
+          <div class="header-avatar">
+            {{ currentUser()?.name?.substring(0, 2)?.toUpperCase() || 'US' }}
+          </div>
+          <div class="header-user-details">
+            <span class="header-user-name">{{ currentUser()?.name || 'User' }}</span>
+            <span class="header-user-role">{{ userRole() | titlecase }}</span>
+          </div>
+        </div>
+        <button class="btn-header-logout" (click)="logout()" title="Logout">
+          <svg lucideLogOut class="logout-icon"></svg>
+          <span>Logout</span>
+        </button>
       </div>
     </header>
 
     <!-- Role Based Dynamic Dashboards (Component Based Architecture) -->
     <div class="dashboard-viewport">
-      <app-student-dashboard *ngIf="userRole() === 'student'"></app-student-dashboard>
+      <app-student-dashboard
+        *ngIf="userRole() === 'student'"
+        [(activePage)]="studentActivePage">
+      </app-student-dashboard>
       <app-teacher-dashboard *ngIf="userRole() === 'teacher'"></app-teacher-dashboard>
-      <app-admin-dashboard *ngIf="userRole() === 'admin'"></app-admin-dashboard>
+      <app-admin-dashboard *ngIf="userRole() === 'admin'" [(activePage)]="adminActivePage"></app-admin-dashboard>
     </div>
 
   </main>

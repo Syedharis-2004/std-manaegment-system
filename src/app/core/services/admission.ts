@@ -20,4 +20,8 @@ export class AdmissionService {
   approveAdmission(userId: string): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/admission/approve/${userId}`, {});
   }
+
+  rejectAdmission(userId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/admission/reject/${userId}`);
+  }
 }

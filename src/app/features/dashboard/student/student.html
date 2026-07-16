@@ -1,102 +1,403 @@
-<div class="student-dashboard fade-in">
+<div class="student-dashboard">
   
-  <!-- Backend Authorization Status Alert -->
-  <div class="glass-card status-alert" [class.authorized]="isAuthorized()" [class.loading]="isLoading()" [class.unauthorized]="!isLoading() && !isAuthorized()">
-    <div class="status-indicator"></div>
-    <span class="status-text">{{ backendMessage() }}</span>
-  </div>
-
   <div *ngIf="isAuthorized()">
-    <!-- Metrics Grid -->
-    <div class="metrics-grid">
-      <!-- GPA Card -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper blue">
-          <svg lucideGraduationCap></svg>
+
+    <!-- ========================================
+         PAGE: DASHBOARD (default)
+         ======================================== -->
+    <div *ngIf="activePage() === 'dashboard'" class="page-section">
+      <!-- Metrics Grid -->
+      <div class="metrics-grid">
+        <!-- Number of Classes Card -->
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper blue">
+            <svg lucideCalendar></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Total Classes</span>
+            <h2 class="metric-value">{{ attendedClasses() }} <span class="metric-unit">/ {{ totalClasses() }}</span></h2>
+          </div>
         </div>
-        <div class="metric-details">
-          <span class="metric-label">Cumulative GPA</span>
-          <h2 class="metric-value">{{ gpa() }} <span class="metric-unit">/ 4.0</span></h2>
+
+        <!-- Attendance Card (Clickable) -->
+        <div class="glass-card metric-card clickable-card" (click)="viewAttendanceDetails()" style="cursor: pointer;">
+          <div class="metric-icon-wrapper green">
+            <svg lucideCheckCircle></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Class Attendance (Details)</span>
+            <h2 class="metric-value">{{ attendance() }}%</h2>
+          </div>
+        </div>
+
+        <!-- Pending Assignments Card -->
+        <div class="glass-card metric-card">
+          <div class="metric-icon-wrapper purple">
+            <svg lucideClipboardList></svg>
+          </div>
+          <div class="metric-details">
+            <span class="metric-label">Pending Assignments</span>
+            <h2 class="metric-value">{{ getPendingAssignments() }} <span class="metric-unit">Tasks</span></h2>
+          </div>
         </div>
       </div>
 
-      <!-- Attendance Card -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper green">
-          <svg lucideCheckCircle></svg>
-        </div>
-        <div class="metric-details">
-          <span class="metric-label">Class Attendance</span>
-          <h2 class="metric-value">{{ attendance() }}%</h2>
-        </div>
-      </div>
+    </div>
 
-      <!-- Credit Hours Card -->
-      <div class="glass-card metric-card">
-        <div class="metric-icon-wrapper purple">
+    <!-- ========================================
+         PAGE: CLASS (overview)
+         ======================================== -->
+    <div *ngIf="activePage() === 'class'" class="page-section">
+      <div class="page-hero glass-card">
+        <div class="page-hero-icon indigo">
           <svg lucideBookOpen></svg>
         </div>
-        <div class="metric-details">
-          <span class="metric-label">Completed Credits</span>
-          <h2 class="metric-value">{{ completedCredits() }} <span class="metric-unit">/ {{ totalCredits() }}</span></h2>
+        <div class="page-hero-text">
+          <h2>My Class</h2>
+          <p>Spring 2026 — Bachelor of Computer Science (Year 3)</p>
+        </div>
+        <span class="badge blue">Active Semester</span>
+      </div>
+      <div class="class-quick-stats">
+        <div class="glass-card quick-stat-card">
+          <span class="qs-num">4</span>
+          <span class="qs-label">Enrolled Subjects</span>
+        </div>
+        <div class="glass-card quick-stat-card">
+          <span class="qs-num">4</span>
+          <span class="qs-label">Teaching Faculty</span>
+        </div>
+        <div class="glass-card quick-stat-card">
+          <span class="qs-num">11</span>
+          <span class="qs-label">Credit Hours</span>
+        </div>
+        <div class="glass-card quick-stat-card">
+          <span class="qs-num green">3</span>
+          <span class="qs-label">Ongoing Subjects</span>
+        </div>
+      </div>
+      <div class="page-cta-note">
+        <svg lucideInfo class="cta-icon"></svg>
+        <span>Click <strong>Class Detail</strong> in the sidebar to view subjects and teachers.</span>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: CLASS DETAIL
+         ======================================== -->
+    <div *ngIf="activePage() === 'class-detail'" class="page-section">
+      
+      <!-- Subjects Section -->
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideBookOpen class="section-icon"></svg>
+          Subjects
+        </h2>
+        <span class="badge blue">Spring 2026</span>
+      </div>
+
+      <div class="glass-card detail-table-card">
+        <div class="detail-table-wrapper">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Code</th>
+                <th>Schedule & Room</th>
+                <th>Teacher</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let sub of subjects()" class="detail-row">
+                <td class="subject-name-cell">{{ sub.name }}</td>
+                <td><span class="code-chip">{{ sub.code }}</span></td>
+                <td>
+                  <div class="time-cell">
+                    <svg lucideClock class="time-icon"></svg>
+                    <div>
+                      <span class="time-text">{{ sub.time }}</span>
+                      <span class="room-text">{{ sub.room }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <button class="teacher-link-btn" (click)="selectTeacher(sub.name)">
+                    <span class="teacher-link-avatar">{{ getTeacherInitials(getTeacherForSubject(sub.name)?.name || '??') }}</span>
+                    <span class="teacher-link-name">{{ getTeacherForSubject(sub.name)?.name || 'N/A' }}</span>
+                  </button>
+                </td>
+                <td>
+                  <span class="status-pill" [class.ongoing]="sub.status === 'Ongoing'" [class.completed]="sub.status === 'Completed'">
+                    {{ sub.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Visual Columns Grid -->
-    <div class="dashboard-columns-grid">
-      
-      <!-- Courses List -->
-      <div class="glass-card column-card">
-        <div class="card-title-bar">
-          <h3>Enrolled Courses</h3>
+    <!-- ========================================
+         PAGE: FEE HISTORY
+         ======================================== -->
+    <div *ngIf="activePage() === 'fee-history'" class="page-section">
+
+      <!-- Summary Cards -->
+      <div class="fee-summary-row">
+        <div class="glass-card fee-summary-card">
+          <div class="fee-sum-icon blue">
+            <svg lucideCreditCard></svg>
+          </div>
+          <div class="fee-sum-details">
+            <span class="fee-sum-label">Total Billed</span>
+            <span class="fee-sum-value">PKR {{ getTotalFees().toLocaleString() }}</span>
+          </div>
+        </div>
+        <div class="glass-card fee-summary-card">
+          <div class="fee-sum-icon green">
+            <svg lucideCheckCircle></svg>
+          </div>
+          <div class="fee-sum-details">
+            <span class="fee-sum-label">Total Paid</span>
+            <span class="fee-sum-value">PKR {{ getTotalPaid().toLocaleString() }}</span>
+          </div>
+        </div>
+        <div class="glass-card fee-summary-card">
+          <div class="fee-sum-icon rose">
+            <svg lucideAlertCircle></svg>
+          </div>
+          <div class="fee-sum-details">
+            <span class="fee-sum-label">Outstanding</span>
+            <span class="fee-sum-value">PKR {{ (getTotalFees() - getTotalPaid()).toLocaleString() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card detail-table-card">
+        <div class="card-title-bar" style="margin-bottom: 1.25rem;">
+          <h3>Payment History</h3>
+          <span class="badge blue">All Semesters</span>
+        </div>
+        <div class="detail-table-wrapper">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Invoice ID</th>
+                <th>Semester</th>
+                <th>Amount</th>
+                <th>Paid</th>
+                <th>Date</th>
+                <th>Method</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let fee of feeHistory()" class="detail-row">
+                <td><span class="code-chip">{{ fee.id }}</span></td>
+                <td>{{ fee.semester }}</td>
+                <td>PKR {{ fee.amount.toLocaleString() }}</td>
+                <td>PKR {{ fee.paid.toLocaleString() }}</td>
+                <td class="date-cell">{{ fee.date }}</td>
+                <td>{{ fee.method }}</td>
+                <td>
+                  <span class="status-pill" [class.ongoing]="fee.status === 'Paid'" [class.partial]="fee.status === 'Partial'">
+                    {{ fee.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: NOTICE
+         ======================================== -->
+    <div *ngIf="activePage() === 'notice'" class="page-section">
+
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideBell class="section-icon"></svg>
+          Notice Board
+        </h2>
+        <span class="badge rose">{{ notices().length }} Notices</span>
+      </div>
+
+      <div class="notices-list">
+        <div *ngFor="let notice of notices()" class="glass-card notice-card" [class.high-priority]="notice.priority === 'high'">
+          <div class="notice-header">
+            <div class="notice-meta">
+              <span class="notice-category-badge" [class.exam]="notice.category === 'Exam'" [class.finance]="notice.category === 'Finance'" [class.event]="notice.category === 'Event'" [class.facility]="notice.category === 'Facility'">
+                {{ notice.category }}
+              </span>
+              <span class="notice-date">
+                <svg lucideCalendar class="date-icon"></svg>
+                {{ notice.date }}
+              </span>
+            </div>
+            <svg *ngIf="notice.priority === 'high'" lucideAlertTriangle class="priority-icon"></svg>
+          </div>
+          <h3 class="notice-title">{{ notice.title }}</h3>
+          <p class="notice-body">{{ notice.body }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: ASSIGNMENTS
+         ======================================== -->
+    <div *ngIf="activePage() === 'assignments'" class="page-section">
+
+      <!-- Stats Row -->
+      <div class="assignment-stats-row">
+        <div class="glass-card assi-stat">
+          <span class="assi-num">{{ assignments().length }}</span>
+          <span class="assi-label">Total</span>
+        </div>
+        <div class="glass-card assi-stat">
+          <span class="assi-num rose">{{ getPendingAssignments() }}</span>
+          <span class="assi-label">Pending</span>
+        </div>
+        <div class="glass-card assi-stat">
+          <span class="assi-num green">{{ getCompletedAssignments() }}</span>
+          <span class="assi-label">Completed</span>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideClipboardList class="section-icon"></svg>
+          All Assignments
+        </h2>
+      </div>
+
+      <div class="assignments-full-list">
+        <div *ngFor="let task of assignments()" class="glass-card assignment-full-card"
+          [class.urgent-card]="task.urgent && task.status === 'pending'"
+          [class.done-card]="task.status === 'completed'">
+          
+          <div class="assi-card-left">
+            <div class="assi-check-icon" [class.checked]="task.status === 'completed'">
+              <svg lucideCheckSquare></svg>
+            </div>
+            <div class="assi-info">
+              <h4 class="assi-title">{{ task.title }}</h4>
+              <span class="assi-course">{{ task.course }}</span>
+            </div>
+          </div>
+
+          <div class="assi-card-right">
+            <span class="assi-due" [class.urgent-text]="task.urgent && task.status === 'pending'">
+              <svg lucideCalendar class="date-icon"></svg>
+              {{ task.due }}
+            </span>
+            <span class="status-pill"
+              [class.ongoing]="task.status === 'completed'"
+              [class.partial]="task.status === 'pending' && !task.urgent"
+              [class.overdue]="task.urgent && task.status === 'pending'">
+              {{ task.status === 'completed' ? 'Submitted' : (task.urgent ? 'Urgent' : 'Pending') }}
+            </span>
+            <button *ngIf="task.status === 'pending'" class="btn-action-sm">Submit</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: ATTENDANCE DETAIL
+         ======================================== -->
+    <div *ngIf="activePage() === 'attendance-detail'" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideCheckCircle class="section-icon"></svg>
+          Detailed Attendance Report
+        </h2>
+        <button class="btn-action-sm" (click)="activePage.set('dashboard')">Back to Dashboard</button>
+      </div>
+
+      <!-- Subject-wise Summary Grid -->
+      <div class="class-quick-stats">
+        <div *ngFor="let sub of subjectAttendance()" class="glass-card quick-stat-card">
+          <span class="qs-num">{{ sub.percentage }}%</span>
+          <span class="qs-label">{{ sub.name }}</span>
+          <span class="room-text" style="font-size: 0.8rem; margin-top: 0.25rem;">{{ sub.attended }} / {{ sub.total }} Classes</span>
+        </div>
+      </div>
+
+      <!-- Daily Log Table -->
+      <div class="glass-card detail-table-card" style="margin-top: 1.5rem;">
+        <div class="card-title-bar" style="margin-bottom: 1.25rem;">
+          <h3>Daily Attendance Log</h3>
           <span class="badge blue">Spring 2026</span>
         </div>
-        <div class="course-list">
-          <div *ngFor="let course of courses()" class="course-item">
-            <div class="course-header">
-              <div class="course-info">
-                <span class="course-code">{{ course.code }}</span>
-                <h4 class="course-name">{{ course.name }}</h4>
-                <span class="course-instructor">{{ course.instructor }}</span>
-              </div>
-              <span class="course-grade">{{ course.grade }}</span>
-            </div>
-            <div class="progress-track-wrapper">
-              <div class="progress-track">
-                <div class="progress-bar" [style.width.%]="course.progress"></div>
-              </div>
-              <span class="progress-text">{{ course.progress }}% Syllabus</span>
-            </div>
+        <div class="detail-table-wrapper">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Subject Name</th>
+                <th>Code</th>
+                <th>Timing</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of dailyAttendanceLog()" class="detail-row">
+                <td class="date-cell">{{ log.date }}</td>
+                <td class="subject-name-cell">{{ log.subject }}</td>
+                <td><span class="code-chip">{{ log.code }}</span></td>
+                <td>{{ log.time }}</td>
+                <td>
+                  <span class="status-pill" 
+                    [class.ongoing]="log.status === 'Present'" 
+                    [class.partial]="log.status === 'Excused'"
+                    [class.overdue]="log.status === 'Absent'">
+                    {{ log.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Teacher Detail Panel -->
+  <div *ngIf="selectedTeacher()" class="teacher-detail-panel" (click)="closeTeacherPanel()">
+    <div class="teacher-detail-card" (click)="$event.stopPropagation()">
+      <button class="teacher-panel-close" (click)="closeTeacherPanel()">&times;</button>
+      <div class="teacher-panel-avatar">{{ getTeacherInitials(selectedTeacher().name) }}</div>
+      <h3 class="teacher-panel-name">{{ selectedTeacher().name }}</h3>
+      <span class="teacher-panel-subject">{{ selectedTeacher().subject }}</span>
+      <div class="teacher-panel-info-grid">
+        <div class="teacher-panel-info-item">
+          <svg lucideUser class="tp-icon"></svg>
+          <div>
+            <span class="tp-label">Current Status</span>
+            <span class="teacher-status-badge"
+              [class.available]="selectedTeacher().status === 'Available'"
+              [class.in-lecture]="selectedTeacher().status === 'In Lecture'"
+              [class.on-leave]="selectedTeacher().status === 'On Leave'">
+              {{ selectedTeacher().status }}
+            </span>
+          </div>
+        </div>
+        <div class="teacher-panel-info-item">
+          <svg lucideCheckCircle class="tp-icon"></svg>
+          <div>
+            <span class="tp-label">Today's Presence</span>
+            <span class="tp-presence-badge" [class.present]="selectedTeacher().todayPresent" [class.absent]="!selectedTeacher().todayPresent">
+              {{ selectedTeacher().todayPresent ? 'Present Today' : 'Absent Today' }}
+            </span>
           </div>
         </div>
       </div>
-
-      <!-- Assignments & Tasks -->
-      <div class="glass-card column-card">
-        <div class="card-title-bar">
-          <h3>Pending Assignments</h3>
-          <span class="badge rose">Action Required</span>
-        </div>
-        <div class="assignment-list">
-          <div *ngFor="let task of assignments()" class="assignment-item" [class.urgent]="task.urgent && task.status === 'pending'">
-            <div class="assignment-details">
-              <div class="assignment-main">
-                <h4 class="assignment-title">{{ task.title }}</h4>
-                <span class="assignment-course">{{ task.course }}</span>
-              </div>
-              <span class="assignment-due">{{ task.due }}</span>
-            </div>
-            <div class="assignment-footer">
-              <span class="status-badge" [class.completed]="task.status === 'completed'" [class.pending]="task.status === 'pending'">
-                {{ task.status | titlecase }}
-              </span>
-              <button *ngIf="task.status === 'pending'" class="btn-action-sm">Submit Work</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 

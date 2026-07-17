@@ -1,20 +1,22 @@
 import { Component, OnInit, inject, signal, model } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AdmissionService } from '../../../core/services/admission';
 import {
   LucideUsers, LucideUserCheck,
   LucideSchool, LucideCreditCard, LucideUpload, LucideCheckCircle,
-  LucideXCircle
+  LucideXCircle, LucideUserCog, LucideClock, LucideSearch
 } from '@lucide/angular';
 
 @Component({
   selector: 'app-admin-dashboard',
   imports: [
     CommonModule,
+    FormsModule,
     LucideUsers, LucideUserCheck,
     LucideSchool, LucideCreditCard, LucideUpload, LucideCheckCircle,
-    LucideXCircle
+    LucideXCircle, LucideUserCog, LucideClock, LucideSearch
   ],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
@@ -82,6 +84,93 @@ export class AdminDashboard implements OnInit {
   uploadFile = signal<File | null>(null);
   uploadSuccess = signal<boolean>(false);
   uploadError = signal<string | null>(null);
+
+  studentSearchQuery = '';
+  teacherSearchQuery = '';
+  staffSearchQuery = '';
+  classSearchQuery = '';
+
+  get filteredStudents() {
+    const query = this.studentSearchQuery.toLowerCase().trim();
+    if (!query) return this.students();
+    return this.students().filter(s => 
+      s.name.toLowerCase().includes(query) || 
+      s.id.toLowerCase().includes(query) || 
+      s.class.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredTeachers() {
+    const query = this.teacherSearchQuery.toLowerCase().trim();
+    if (!query) return this.teachers();
+    return this.teachers().filter(t => 
+      t.name.toLowerCase().includes(query) || 
+      t.id.toLowerCase().includes(query) || 
+      t.subject.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredStaff() {
+    const query = this.staffSearchQuery.toLowerCase().trim();
+    if (!query) return this.staff();
+    return this.staff().filter(s => 
+      s.name.toLowerCase().includes(query) || 
+      s.id.toLowerCase().includes(query) || 
+      s.role.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredClasses() {
+    const query = this.classSearchQuery.toLowerCase().trim();
+    if (!query) return this.classes();
+    return this.classes().filter(c => 
+      c.id.toLowerCase().includes(query) || 
+      c.program.toLowerCase().includes(query) || 
+      c.teacher.toLowerCase().includes(query)
+    );
+  }
+
+  onStudentSearch(event: Event): void { this.studentSearchQuery = (event.target as HTMLInputElement).value; }
+  onTeacherSearch(event: Event): void { this.teacherSearchQuery = (event.target as HTMLInputElement).value; }
+  onStaffSearch(event: Event): void { this.staffSearchQuery = (event.target as HTMLInputElement).value; }
+  onClassSearch(event: Event): void { this.classSearchQuery = (event.target as HTMLInputElement).value; }
+
+  showCreateModal = signal<boolean>(false);
+  createUserRole = signal<'student' | 'teacher' | 'staff'>('student');
+  newUser = {
+    name: '',
+    email: '',
+    class: '',
+    subject: '',
+    role: ''
+  };
+
+  openCreateModal(role: 'student' | 'teacher' | 'staff') {
+    this.createUserRole.set(role);
+    this.newUser = { name: '', email: '', class: '', subject: '', role: '' };
+    this.showCreateModal.set(true);
+  }
+
+  closeCreateModal() {
+    this.showCreateModal.set(false);
+  }
+
+  onCreateUserSubmit() {
+    const role = this.createUserRole();
+    if (role === 'student') {
+      const id = 'S-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      this.students.update(s => [{ id, name: this.newUser.name, email: this.newUser.email, class: this.newUser.class, status: 'active', fee: 'Pending' }, ...s]);
+    } else if (role === 'teacher') {
+      const id = 'T-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      this.teachers.update(t => [{ id, name: this.newUser.name, subject: this.newUser.subject, email: this.newUser.email, status: 'active', todayPresent: true }, ...t]);
+    } else if (role === 'staff') {
+      const id = 'ST-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      this.staff.update(s => [{ id, name: this.newUser.name, role: this.newUser.role, email: this.newUser.email, status: 'active' }, ...s]);
+    }
+    
+    this.showToast(`New ${role} created successfully!`);
+    this.closeCreateModal();
+  }
 
   users = signal([
     { name: 'Dr. Sarah Connor', email: 'sconnor@institution.edu', role: 'teacher', status: 'active' },

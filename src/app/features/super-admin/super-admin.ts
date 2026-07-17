@@ -19,11 +19,12 @@ import {
   LucideSearch,
   LucideFilter,
   LucideMoreVertical,
-  LucideStar
+  LucideStar,
+  LucideUserCog
 } from '@lucide/angular';
 
 type Institution = 'je-academy' | 'kids-academy';
-type Page = 'dashboard' | 'class' | 'users';
+type Page = 'dashboard' | 'class' | 'users' | 'admissions';
 
 @Component({
   selector: 'app-super-admin',
@@ -46,7 +47,8 @@ type Page = 'dashboard' | 'class' | 'users';
     LucideSearch,
     LucideFilter,
     LucideMoreVertical,
-    LucideStar
+    LucideStar,
+    LucideUserCog
   ],
   templateUrl: './super-admin.html',
   styleUrl: './super-admin.css'
@@ -58,6 +60,7 @@ export class SuperAdmin implements OnInit {
   // Phase control: select institution first, then show dashboard
   selectedInstitution = signal<Institution | null>(null);
   activePage = signal<Page>('dashboard');
+  userRoleFilter = signal<string | null>(null);
 
   currentUser = signal<any>(null);
 
@@ -67,7 +70,8 @@ export class SuperAdmin implements OnInit {
       totalStudents: 842,
       totalTeachers: 64,
       totalClasses: 24,
-      pendingAdmissions: 12
+      pendingAdmissions: 12,
+      totalStaff: 18
     },
     classes: [
       { id: 'CS-4A', program: 'Computer Science', semester: '7th', students: 38, teacher: 'Dr. Sarah Connor', room: 'CS-301', status: 'active' },
@@ -86,6 +90,12 @@ export class SuperAdmin implements OnInit {
       { id: 'U-006', name: 'Fatima Noor',         email: 'fnoor@je.edu',      role: 'student', status: 'active',   joined: 'Jan 2025' },
       { id: 'U-007', name: 'Mary Shelley',        email: 'mshelley@je.edu',   role: 'teacher', status: 'active',   joined: 'Aug 2021' },
       { id: 'U-008', name: 'Taha Waseem',         email: 'taha@je.edu',       role: 'student', status: 'active',   joined: 'Feb 2025' },
+      { id: 'U-009', name: 'Robert Brown',        email: 'rbrown@je.edu',     role: 'staff',   status: 'active',   joined: 'Jan 2020' },
+      { id: 'U-010', name: 'Emily Davis',         email: 'edavis@je.edu',     role: 'staff',   status: 'active',   joined: 'Mar 2021' },
+    ],
+    admissions: [
+      { id: 'APP-001', name: 'Zainab Ali', class: 'BSc Computer Science', date: 'Jul 15, 2026', status: 'pending' },
+      { id: 'APP-002', name: 'Omar Khan', class: 'BBA', date: 'Jul 16, 2026', status: 'pending' }
     ]
   };
 
@@ -95,7 +105,8 @@ export class SuperAdmin implements OnInit {
       totalStudents: 320,
       totalTeachers: 28,
       totalClasses: 12,
-      pendingAdmissions: 5
+      pendingAdmissions: 5,
+      totalStaff: 8
     },
     classes: [
       { id: 'KG-A', program: 'Kindergarten', semester: 'Year 1', students: 22, teacher: 'Ms. Emma Watson', room: 'KG-01', status: 'active' },
@@ -112,11 +123,75 @@ export class SuperAdmin implements OnInit {
       { id: 'K-004', name: 'Ali Hassan',         email: 'ali@kids.edu',     role: 'student', status: 'active',   joined: 'Sep 2024' },
       { id: 'K-005', name: 'Sara Malik',         email: 'sara@kids.edu',    role: 'student', status: 'active',   joined: 'Jan 2025' },
       { id: 'K-006', name: 'Bilal Ahmed',        email: 'bilal@kids.edu',   role: 'student', status: 'inactive', joined: 'Sep 2023' },
+      { id: 'K-007', name: 'John Smith',         email: 'jsmith@kids.edu',  role: 'staff',   status: 'active',   joined: 'Feb 2022' },
+    ],
+    admissions: [
+      { id: 'APP-101', name: 'Ayesha Raza', class: 'Grade 1', date: 'Jul 10, 2026', status: 'pending' },
+      { id: 'APP-102', name: 'Hamza Tariq', class: 'Kindergarten', date: 'Jul 12, 2026', status: 'pending' }
     ]
   };
 
   get data() {
     return this.selectedInstitution() === 'kids-academy' ? this.kidsData : this.jeData;
+  }
+
+  classSearchQuery = '';
+  userSearchQuery = '';
+  admissionSearchQuery = '';
+
+  get filteredClasses() {
+    const query = this.classSearchQuery.toLowerCase().trim();
+    if (!query) return this.data.classes;
+    return this.data.classes.filter(cls => 
+      cls.id.toLowerCase().includes(query) ||
+      cls.program.toLowerCase().includes(query) ||
+      cls.teacher.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredUsers() {
+    let users = this.data.users;
+    
+    const roleFilter = this.userRoleFilter();
+    if (roleFilter) {
+      users = users.filter(u => u.role === roleFilter);
+    }
+
+    const query = this.userSearchQuery.toLowerCase().trim();
+    if (query) {
+      users = users.filter(user => 
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.role.toLowerCase().includes(query)
+      );
+    }
+    
+    return users;
+  }
+
+  get filteredAdmissions() {
+    const query = this.admissionSearchQuery.toLowerCase().trim();
+    if (!query) return this.data.admissions;
+    return this.data.admissions.filter(adm => 
+      adm.name.toLowerCase().includes(query) ||
+      adm.id.toLowerCase().includes(query) ||
+      adm.class.toLowerCase().includes(query)
+    );
+  }
+
+  onClassSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.classSearchQuery = input.value;
+  }
+
+  onUserSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.userSearchQuery = input.value;
+  }
+
+  onAdmissionSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.admissionSearchQuery = input.value;
   }
 
   get institutionLabel() {
@@ -141,7 +216,11 @@ export class SuperAdmin implements OnInit {
     this.activePage.set('dashboard');
   }
 
-  navigate(page: Page): void {
+  navigate(page: Page, roleFilter: string | null = null): void {
+    this.userRoleFilter.set(roleFilter);
+    this.userSearchQuery = '';
+    this.classSearchQuery = '';
+    this.admissionSearchQuery = '';
     this.activePage.set(page);
   }
 

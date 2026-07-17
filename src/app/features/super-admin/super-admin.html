@@ -83,300 +83,399 @@
 <!-- ═══════════════════════════════════════════════════════════
      MAIN SUPER ADMIN DASHBOARD (after institution selected)
      ═══════════════════════════════════════════════════════════ -->
-<div *ngIf="selectedInstitution()" class="sa-container">
+<div *ngIf="selectedInstitution()" class="dashboard-container fade-in">
 
-  <!-- ── SIDEBAR ── -->
-  <aside class="sa-sidebar" [class.je-sidebar]="institutionAccent === 'je'" [class.kids-sidebar]="institutionAccent === 'kids'">
+  <!-- ── SIDEBAR (matches dashboard layout) ── -->
+  <aside class="sidebar">
 
     <!-- Brand -->
-    <div class="sa-brand">
-      <div class="sa-brand-icon" [class.je-icon]="institutionAccent === 'je'" [class.kids-icon]="institutionAccent === 'kids'">
-        <svg *ngIf="institutionAccent === 'je'" lucideGraduationCap style="width:1.4rem;height:1.4rem"></svg>
-        <svg *ngIf="institutionAccent === 'kids'" lucideBookOpen style="width:1.4rem;height:1.4rem"></svg>
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <img src="assets/logo.png" alt="Logo" width="48" height="48" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
       </div>
-      <div class="sa-brand-text">
-        <span class="sa-brand-inst">{{ institutionLabel }}</span>
-        <span class="sa-brand-role">Super Admin</span>
+      <div class="brand-text-block">
+        <span class="brand-name">{{ institutionLabel }}<span class="gradient-text"></span></span>
+        <span class="sidebar-student-name">Super Admin</span>
       </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="sa-nav">
-      <button class="sa-nav-item"
+    <nav class="sidebar-menu">
+      <button class="menu-item"
         [class.active]="activePage() === 'dashboard'"
         (click)="navigate('dashboard')">
-        <svg lucideLayoutDashboard class="sa-nav-icon"></svg>
+        <svg lucideLayoutDashboard class="menu-icon"></svg>
         <span>Dashboard</span>
       </button>
 
-      <button class="sa-nav-item"
+      <button class="menu-item"
         [class.active]="activePage() === 'class'"
         (click)="navigate('class')">
-        <svg lucideSchool class="sa-nav-icon"></svg>
+        <svg lucideSchool class="menu-icon"></svg>
         <span>Class</span>
       </button>
 
-      <button class="sa-nav-item"
+      <button class="menu-item"
         [class.active]="activePage() === 'users'"
         (click)="navigate('users')">
-        <svg lucideUsers class="sa-nav-icon"></svg>
+        <svg lucideUsers class="menu-icon"></svg>
         <span>Users</span>
       </button>
     </nav>
 
     <!-- Sidebar Footer -->
-    <div class="sa-sidebar-footer">
+    <div class="sidebar-footer">
       <button class="sa-switch-btn" (click)="backToSelect()">
         <svg lucideBuilding2 style="width:0.95rem;height:0.95rem"></svg>
         Switch Institution
-      </button>
-      <button class="sa-logout-btn" (click)="logout()">
-        <svg lucideLogOut style="width:0.95rem;height:0.95rem"></svg>
-        Logout
       </button>
     </div>
 
   </aside>
 
   <!-- ── MAIN CONTENT ── -->
-  <main class="sa-main">
+  <main class="main-content">
 
-    <!-- Top Header -->
-    <header class="sa-header">
-      <div class="sa-header-left">
+    <!-- Top Header Bar (matches dashboard) -->
+    <header class="content-header">
+      <div class="header-left">
+        <h1 class="page-title" style="font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin: 0;">
+          {{ activePage() === 'dashboard' ? 'Welcome back, ' + (currentUser()?.name || 'Super Admin') + '!' : activePage() === 'class' ? 'Classes' : activePage() === 'admissions' ? 'Pending Admissions' : 'Users' }}
+        </h1>
+      </div>
+
+      <!-- Top-Right: User Profile + Logout -->
+      <div class="header-user-area">
         <div class="sa-inst-pill" [class.je-pill]="institutionAccent === 'je'" [class.kids-pill]="institutionAccent === 'kids'">
           <svg *ngIf="institutionAccent === 'je'" lucideGraduationCap style="width:0.85rem;height:0.85rem"></svg>
           <svg *ngIf="institutionAccent === 'kids'" lucideBookOpen style="width:0.85rem;height:0.85rem"></svg>
           {{ institutionLabel }}
         </div>
-        <h1 class="sa-header-title">
-          {{ activePage() === 'dashboard' ? 'Overview' : activePage() === 'class' ? 'Classes' : 'Users' }}
-        </h1>
-      </div>
-      <div class="sa-header-user">
-        <div class="sa-user-chip">
-          <div class="sa-user-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
+        <div class="header-user-chip">
+          <div class="header-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
             {{ getInitials(currentUser()?.name || 'SA') }}
           </div>
-          <div class="sa-user-info">
-            <span class="sa-user-name">{{ currentUser()?.name || 'Super Admin' }}</span>
-            <span class="sa-user-role">Super Admin</span>
+          <div class="header-user-details">
+            <span class="header-user-name">{{ currentUser()?.name || 'Super Admin' }}</span>
+            <span class="header-user-role">Super Admin</span>
           </div>
         </div>
+        <button class="btn-header-logout" (click)="logout()" title="Logout">
+          <svg lucideLogOut class="logout-icon"></svg>
+          <span>Logout</span>
+        </button>
       </div>
     </header>
 
-    <!-- ═══ PAGE: DASHBOARD ═══ -->
-    <div *ngIf="activePage() === 'dashboard'" class="sa-page">
+    <!-- Dashboard Viewport -->
+    <div class="dashboard-viewport">
 
-      <!-- Stats Grid -->
-      <div class="sa-stats-grid">
+      <!-- ═══ PAGE: DASHBOARD ═══ -->
+      <div *ngIf="activePage() === 'dashboard'" class="sa-page">
 
-        <div class="sa-stat-card" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'">
-          <div class="sa-stat-icon-wrap blue-wrap">
-            <svg lucideUsers style="width:1.3rem;height:1.3rem"></svg>
+        <!-- Stats Grid -->
+        <div class="sa-stats-grid">
+
+          <div class="sa-stat-card" style="cursor: pointer;" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'" (click)="navigate('users', 'student')">
+            <div class="sa-stat-icon-wrap blue-wrap">
+              <svg lucideUsers style="width:1.3rem;height:1.3rem"></svg>
+            </div>
+            <div class="sa-stat-body">
+              <span class="sa-stat-label">Total Students</span>
+              <span class="sa-stat-value">{{ data.stats.totalStudents }}</span>
+            </div>
+            <div class="sa-stat-trend up">↑ 12%</div>
           </div>
-          <div class="sa-stat-body">
-            <span class="sa-stat-label">Total Students</span>
-            <span class="sa-stat-value">{{ data.stats.totalStudents }}</span>
+
+          <div class="sa-stat-card" style="cursor: pointer;" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'" (click)="navigate('users', 'teacher')">
+            <div class="sa-stat-icon-wrap purple-wrap">
+              <svg lucideUserCheck style="width:1.3rem;height:1.3rem"></svg>
+            </div>
+            <div class="sa-stat-body">
+              <span class="sa-stat-label">Teachers</span>
+              <span class="sa-stat-value">{{ data.stats.totalTeachers }}</span>
+            </div>
+            <div class="sa-stat-trend up">↑ 4%</div>
           </div>
-          <div class="sa-stat-trend up">↑ 12%</div>
+
+          <div class="sa-stat-card" style="cursor: pointer;" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'" (click)="navigate('users', 'staff')">
+            <div class="sa-stat-icon-wrap amber-wrap">
+              <svg lucideUserCog style="width:1.3rem;height:1.3rem"></svg>
+            </div>
+            <div class="sa-stat-body">
+              <span class="sa-stat-label">Staff Members</span>
+              <span class="sa-stat-value">{{ data.stats.totalStaff }}</span>
+            </div>
+            <div class="sa-stat-trend up">↑ 2%</div>
+          </div>
+
+          <div class="sa-stat-card" style="cursor: pointer;" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'" (click)="navigate('class')">
+            <div class="sa-stat-icon-wrap green-wrap">
+              <svg lucideSchool style="width:1.3rem;height:1.3rem"></svg>
+            </div>
+            <div class="sa-stat-body">
+              <span class="sa-stat-label">Active Classes</span>
+              <span class="sa-stat-value">{{ data.stats.totalClasses }}</span>
+            </div>
+            <div class="sa-stat-trend neutral">→ Stable</div>
+          </div>
+
+          <div class="sa-stat-card" style="cursor: pointer;" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'" (click)="navigate('admissions')">
+            <div class="sa-stat-icon-wrap amber-wrap">
+              <svg lucideClock style="width:1.3rem;height:1.3rem"></svg>
+            </div>
+            <div class="sa-stat-body">
+              <span class="sa-stat-label">Pending Admissions</span>
+              <span class="sa-stat-value">{{ data.stats.pendingAdmissions }}</span>
+            </div>
+            <div class="sa-stat-trend down">↓ Review</div>
+          </div>
+
         </div>
 
-        <div class="sa-stat-card" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'">
-          <div class="sa-stat-icon-wrap purple-wrap">
-            <svg lucideUserCheck style="width:1.3rem;height:1.3rem"></svg>
+        <!-- Dashboard Bottom: Institution Summary Card -->
+        <div class="sa-summary-card">
+          <div class="sa-summary-header">
+            <h3 class="sa-summary-title">Institution Overview</h3>
+            <span class="sa-summary-badge" [class.je-badge]="institutionAccent === 'je'" [class.kids-badge]="institutionAccent === 'kids'">
+              {{ institutionLabel }}
+            </span>
           </div>
-          <div class="sa-stat-body">
-            <span class="sa-stat-label">Teachers</span>
-            <span class="sa-stat-value">{{ data.stats.totalTeachers }}</span>
-          </div>
-          <div class="sa-stat-trend up">↑ 4%</div>
-        </div>
 
-        <div class="sa-stat-card" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'">
-          <div class="sa-stat-icon-wrap green-wrap">
-            <svg lucideSchool style="width:1.3rem;height:1.3rem"></svg>
+          <div class="sa-summary-body">
+            <div class="sa-summary-row">
+              <div class="sa-summary-item">
+                <svg lucideCheckCircle class="sa-sum-icon green-icon" style="width:1rem;height:1rem"></svg>
+                <span class="sa-sum-label">System Status</span>
+                <span class="sa-sum-val green-val">Operational</span>
+              </div>
+              <div class="sa-summary-item">
+                <svg lucideTrendingUp class="sa-sum-icon blue-icon" style="width:1rem;height:1rem"></svg>
+                <span class="sa-sum-label">Enrollment Rate</span>
+                <span class="sa-sum-val">94.2%</span>
+              </div>
+              <div class="sa-summary-item">
+                <svg lucideUserCheck class="sa-sum-icon purple-icon" style="width:1rem;height:1rem"></svg>
+                <span class="sa-sum-label">Active Faculty</span>
+                <span class="sa-sum-val">{{ data.stats.totalTeachers }}</span>
+              </div>
+              <div class="sa-summary-item">
+                <svg lucideAlertCircle class="sa-sum-icon amber-icon" style="width:1rem;height:1rem"></svg>
+                <span class="sa-sum-label">Pending Reviews</span>
+                <span class="sa-sum-val amber-val">{{ data.stats.pendingAdmissions }}</span>
+              </div>
+            </div>
           </div>
-          <div class="sa-stat-body">
-            <span class="sa-stat-label">Active Classes</span>
-            <span class="sa-stat-value">{{ data.stats.totalClasses }}</span>
-          </div>
-          <div class="sa-stat-trend neutral">→ Stable</div>
-        </div>
-
-        <div class="sa-stat-card" [class.je-stat]="institutionAccent === 'je'" [class.kids-stat]="institutionAccent === 'kids'">
-          <div class="sa-stat-icon-wrap amber-wrap">
-            <svg lucideClock style="width:1.3rem;height:1.3rem"></svg>
-          </div>
-          <div class="sa-stat-body">
-            <span class="sa-stat-label">Pending Admissions</span>
-            <span class="sa-stat-value">{{ data.stats.pendingAdmissions }}</span>
-          </div>
-          <div class="sa-stat-trend down">↓ Review</div>
         </div>
 
       </div>
 
-      <!-- Dashboard Bottom: Institution Summary Card -->
-      <div class="sa-summary-card">
-        <div class="sa-summary-header">
-          <h3 class="sa-summary-title">Institution Overview</h3>
-          <span class="sa-summary-badge" [class.je-badge]="institutionAccent === 'je'" [class.kids-badge]="institutionAccent === 'kids'">
-            {{ institutionLabel }}
-          </span>
-        </div>
+      <!-- ═══ PAGE: CLASS ═══ -->
+      <div *ngIf="activePage() === 'class'" class="sa-page">
 
-        <div class="sa-summary-body">
-          <div class="sa-summary-row">
-            <div class="sa-summary-item">
-              <svg lucideCheckCircle class="sa-sum-icon green-icon" style="width:1rem;height:1rem"></svg>
-              <span class="sa-sum-label">System Status</span>
-              <span class="sa-sum-val green-val">Operational</span>
+        <div class="sa-table-card">
+          <div class="sa-table-header">
+            <div class="sa-table-title-block">
+              <h3 class="sa-table-title">Class Directory</h3>
+              <span class="sa-count-badge">{{ filteredClasses.length }} Sections</span>
             </div>
-            <div class="sa-summary-item">
-              <svg lucideTrendingUp class="sa-sum-icon blue-icon" style="width:1rem;height:1rem"></svg>
-              <span class="sa-sum-label">Enrollment Rate</span>
-              <span class="sa-sum-val">94.2%</span>
-            </div>
-            <div class="sa-summary-item">
-              <svg lucideUserCheck class="sa-sum-icon purple-icon" style="width:1rem;height:1rem"></svg>
-              <span class="sa-sum-label">Active Faculty</span>
-              <span class="sa-sum-val">{{ data.stats.totalTeachers }}</span>
-            </div>
-            <div class="sa-summary-item">
-              <svg lucideAlertCircle class="sa-sum-icon amber-icon" style="width:1rem;height:1rem"></svg>
-              <span class="sa-sum-label">Pending Reviews</span>
-              <span class="sa-sum-val amber-val">{{ data.stats.pendingAdmissions }}</span>
+            <div class="sa-table-search">
+              <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
+              <input type="text" placeholder="Search by class ID, program, teacher..." class="sa-search-input"
+                [value]="classSearchQuery"
+                (input)="onClassSearch($event)">
             </div>
           </div>
-        </div>
-      </div>
 
-    </div>
-
-    <!-- ═══ PAGE: CLASS ═══ -->
-    <div *ngIf="activePage() === 'class'" class="sa-page">
-
-      <div class="sa-table-card">
-        <div class="sa-table-header">
-          <div class="sa-table-title-block">
-            <h3 class="sa-table-title">Class Directory</h3>
-            <span class="sa-count-badge">{{ data.classes.length }} Sections</span>
-          </div>
-          <div class="sa-table-search">
-            <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
-            <input type="text" placeholder="Search classes..." class="sa-search-input" readonly>
-          </div>
-        </div>
-
-        <div class="sa-table-wrap">
-          <table class="sa-table">
-            <thead>
-              <tr>
-                <th>Class ID</th>
-                <th>Program</th>
-                <th>Semester / Year</th>
-                <th>Students</th>
-                <th>Class Teacher</th>
-                <th>Room</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (cls of data.classes; track cls.id) {
-                <tr class="sa-table-row">
-                  <td><span class="sa-chip">{{ cls.id }}</span></td>
-                  <td class="sa-prog-cell">{{ cls.program }}</td>
-                  <td>{{ cls.semester }}</td>
-                  <td>
-                    <div class="sa-students-cell">
-                      <span class="sa-student-count">{{ cls.students }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="sa-teacher-cell">
-                      <div class="sa-teacher-avatar">{{ getInitials(cls.teacher) }}</div>
-                      <span>{{ cls.teacher }}</span>
-                    </div>
-                  </td>
-                  <td><span class="sa-chip">{{ cls.room }}</span></td>
-                  <td>
-                    <span class="sa-status-pill"
-                      [class.pill-active]="cls.status === 'active'"
-                      [class.pill-inactive]="cls.status === 'inactive'">
-                      {{ cls.status | titlecase }}
-                    </span>
-                  </td>
+          <div class="sa-table-wrap">
+            <table class="sa-table">
+              <thead>
+                <tr>
+                  <th>Class ID</th>
+                  <th>Program</th>
+                  <th>Semester / Year</th>
+                  <th>Students</th>
+                  <th>Class Teacher</th>
+                  <th>Room</th>
+                  <th>Status</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ═══ PAGE: USERS ═══ -->
-    <div *ngIf="activePage() === 'users'" class="sa-page">
-
-      <div class="sa-table-card">
-        <div class="sa-table-header">
-          <div class="sa-table-title-block">
-            <h3 class="sa-table-title">User Directory</h3>
-            <span class="sa-count-badge">{{ data.users.length }} Members</span>
-          </div>
-          <div class="sa-table-search">
-            <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
-            <input type="text" placeholder="Search users..." class="sa-search-input" readonly>
-          </div>
-        </div>
-
-        <div class="sa-table-wrap">
-          <table class="sa-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (user of data.users; track user.id) {
-                <tr class="sa-table-row">
-                  <td><span class="sa-chip">{{ user.id }}</span></td>
-                  <td>
-                    <div class="sa-teacher-cell">
-                      <div class="sa-teacher-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
-                        {{ getInitials(user.name) }}
+              </thead>
+              <tbody>
+                @for (cls of filteredClasses; track cls.id) {
+                  <tr class="sa-table-row">
+                    <td><span class="sa-chip">{{ cls.id }}</span></td>
+                    <td class="sa-prog-cell">{{ cls.program }}</td>
+                    <td>{{ cls.semester }}</td>
+                    <td>
+                      <div class="sa-students-cell">
+                        <span class="sa-student-count">{{ cls.students }}</span>
                       </div>
-                      <span>{{ user.name }}</span>
-                    </div>
-                  </td>
-                  <td class="sa-email-cell">{{ user.email }}</td>
-                  <td>
-                    <span class="sa-role-badge"
-                      [class.role-admin]="user.role === 'admin'"
-                      [class.role-teacher]="user.role === 'teacher'"
-                      [class.role-student]="user.role === 'student'">
-                      {{ user.role | uppercase }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="sa-status-pill"
-                      [class.pill-active]="user.status === 'active'"
-                      [class.pill-inactive]="user.status === 'inactive'">
-                      {{ user.status | titlecase }}
-                    </span>
-                  </td>
-                  <td class="sa-email-cell">{{ user.joined }}</td>
+                    </td>
+                    <td>
+                      <div class="sa-teacher-cell">
+                        <div class="sa-teacher-avatar">{{ getInitials(cls.teacher) }}</div>
+                        <span>{{ cls.teacher }}</span>
+                      </div>
+                    </td>
+                    <td><span class="sa-chip">{{ cls.room }}</span></td>
+                    <td>
+                      <span class="sa-status-pill"
+                        [class.pill-active]="cls.status === 'active'"
+                        [class.pill-inactive]="cls.status === 'inactive'">
+                        {{ cls.status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+                @if (filteredClasses.length === 0) {
+                  <tr>
+                    <td colspan="7" class="sa-empty-search">
+                      <svg lucideSearch style="width:1.5rem;height:1.5rem;opacity:0.4"></svg>
+                      <span>No classes found matching "{{ classSearchQuery }}"</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ PAGE: USERS ═══ -->
+      <div *ngIf="activePage() === 'users'" class="sa-page">
+
+        <div class="sa-table-card">
+          <div class="sa-table-header">
+            <div class="sa-table-title-block">
+              <h3 class="sa-table-title">{{ userRoleFilter() ? (userRoleFilter() | titlecase) + ' Directory' : 'User Directory' }}</h3>
+              <span class="sa-count-badge">{{ filteredUsers.length }} Members</span>
+            </div>
+            <div class="sa-table-search">
+              <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
+              <input type="text" placeholder="Search by name, email, role..." class="sa-search-input"
+                [value]="userSearchQuery"
+                (input)="onUserSearch($event)">
+            </div>
+          </div>
+
+          <div class="sa-table-wrap">
+            <table class="sa-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (user of filteredUsers; track user.id) {
+                  <tr class="sa-table-row">
+                    <td><span class="sa-chip">{{ user.id }}</span></td>
+                    <td>
+                      <div class="sa-teacher-cell">
+                        <div class="sa-teacher-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
+                          {{ getInitials(user.name) }}
+                        </div>
+                        <span>{{ user.name }}</span>
+                      </div>
+                    </td>
+                    <td class="sa-email-cell">{{ user.email }}</td>
+                    <td>
+                      <span class="sa-role-badge"
+                        [class.role-admin]="user.role === 'admin'"
+                        [class.role-teacher]="user.role === 'teacher'"
+                        [class.role-student]="user.role === 'student'">
+                        {{ user.role | uppercase }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="sa-status-pill"
+                        [class.pill-active]="user.status === 'active'"
+                        [class.pill-inactive]="user.status === 'inactive'">
+                        {{ user.status | titlecase }}
+                      </span>
+                    </td>
+                    <td class="sa-email-cell">{{ user.joined }}</td>
+                  </tr>
+                }
+                @if (filteredUsers.length === 0) {
+                  <tr>
+                    <td colspan="6" class="sa-empty-search">
+                      <svg lucideSearch style="width:1.5rem;height:1.5rem;opacity:0.4"></svg>
+                      <span>No users found matching "{{ userSearchQuery }}"</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ PAGE: ADMISSIONS ═══ -->
+      <div *ngIf="activePage() === 'admissions'" class="sa-page">
+        <div class="sa-table-card">
+          <div class="sa-table-header">
+            <div class="sa-table-title-block">
+              <h3 class="sa-table-title">Pending Admissions</h3>
+              <span class="sa-count-badge">{{ filteredAdmissions.length }} Applications</span>
+            </div>
+            <div class="sa-table-search">
+              <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
+              <input type="text" placeholder="Search by name, ID, class..." class="sa-search-input"
+                [value]="admissionSearchQuery"
+                (input)="onAdmissionSearch($event)">
+            </div>
+          </div>
+
+          <div class="sa-table-wrap">
+            <table class="sa-table">
+              <thead>
+                <tr>
+                  <th>Application ID</th>
+                  <th>Name</th>
+                  <th>Class / Program</th>
+                  <th>Application Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (adm of filteredAdmissions; track adm.id) {
+                  <tr class="sa-table-row">
+                    <td><span class="sa-chip">{{ adm.id }}</span></td>
+                    <td>
+                      <div class="sa-teacher-cell">
+                        <div class="sa-teacher-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
+                          {{ getInitials(adm.name) }}
+                        </div>
+                        <span style="font-weight: 500;">{{ adm.name }}</span>
+                      </div>
+                    </td>
+                    <td class="sa-prog-cell">{{ adm.class }}</td>
+                    <td class="sa-email-cell">{{ adm.date }}</td>
+                    <td>
+                      <span class="sa-status-pill pill-inactive" style="color:#f59e0b; border-color: rgba(245,158,11,0.2); background: rgba(245,158,11,0.1);">
+                        {{ adm.status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+                @if (filteredAdmissions.length === 0) {
+                  <tr>
+                    <td colspan="5" class="sa-empty-search">
+                      <svg lucideSearch style="width:1.5rem;height:1.5rem;opacity:0.4"></svg>
+                      <span>No admissions found matching "{{ admissionSearchQuery }}"</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

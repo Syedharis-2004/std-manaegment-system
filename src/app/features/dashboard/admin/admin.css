@@ -925,3 +925,421 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   ENHANCED PENDING ADMISSIONS QUEUE
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Queue Card ── */
+.adm-queue-card {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Header ── */
+.adm-queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.adm-queue-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.adm-queue-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ── Department Filter Select ── */
+.adm-filter-select {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.adm-filter-select:focus {
+  border-color: var(--glass-border-focus, #6366f1);
+}
+
+/* ── Quick Stats Strip ── */
+.adm-stats-strip {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.adm-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.adm-stat-chip.amber {
+  background: rgba(245,158,11,0.08);
+  color: #d97706;
+  border-color: rgba(245,158,11,0.2);
+}
+
+.adm-stat-chip.blue {
+  background: rgba(59,130,246,0.08);
+  color: #2563eb;
+  border-color: rgba(59,130,246,0.2);
+}
+
+.adm-stat-chip.green {
+  background: rgba(16,185,129,0.08);
+  color: #059669;
+  border-color: rgba(16,185,129,0.2);
+}
+
+/* ── Table Row Enhancements ── */
+.adm-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.adm-table tbody tr:hover {
+  background: rgba(99,102,241,0.04);
+}
+
+.adm-row--highlight {
+  background: rgba(99,102,241,0.07) !important;
+  outline: 1.5px solid rgba(99,102,241,0.22);
+  outline-offset: -1px;
+}
+
+/* Sequence number badge */
+.adm-seq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(100,116,139,0.08);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ── Avatar for Admission Queue ── */
+.adm-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+  flex-shrink: 0;
+}
+
+/* ── Class chip inside admission table ── */
+.adm-class-chip {
+  display: inline-block;
+  padding: 0.18rem 0.55rem;
+  background: rgba(99,102,241,0.1);
+  color: #6366f1;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid rgba(99,102,241,0.15);
+}
+
+/* ── Phone row ── */
+.adm-phone {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ── Document Badges (status-aware) ── */
+.doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid rgba(239,68,68,0.2);
+  background: rgba(239,68,68,0.06);
+  color: #b91c1c;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.doc-badge--ok {
+  background: rgba(16,185,129,0.07);
+  color: #065f46;
+  border-color: rgba(16,185,129,0.2);
+}
+
+/* ── View button ── */
+.btn-view-adm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  color: #6366f1;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-view-adm:hover {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.25);
+}
+
+/* Make approve/reject show icons properly */
+.btn-approve,
+.btn-reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+/* student-profile-cell alignment */
+.student-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ══════════════════════════════════════════
+   ADMISSION DETAIL SIDE PANEL
+   ══════════════════════════════════════════ */
+
+.adm-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(3px);
+  z-index: 8000;
+  animation: saFadeIn 0.2s ease;
+}
+
+.adm-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 95vw;
+  background: #ffffff;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+  z-index: 8100;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.adm-detail-panel--open {
+  transform: translateX(0);
+}
+
+/* Panel Header */
+.adm-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.adm-panel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.adm-panel-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #ffffff;
+  box-shadow: 0 3px 12px rgba(99,102,241,0.3);
+  flex-shrink: 0;
+}
+
+.adm-panel-title-group h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+}
+
+/* Panel Scrollable Body */
+.adm-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.adm-panel-body::-webkit-scrollbar { width: 4px; }
+.adm-panel-body::-webkit-scrollbar-track { background: transparent; }
+.adm-panel-body::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,0.2);
+  border-radius: 4px;
+}
+
+/* Section */
+.adm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.adm-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--glass-border);
+}
+
+/* Detail Grid */
+.adm-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.adm-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.adm-detail-key {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.adm-detail-val {
+  font-size: 0.87rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* Documents Checklist */
+.adm-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.adm-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(239,68,68,0.04);
+  border: 1px solid rgba(239,68,68,0.15);
+  transition: background 0.2s;
+}
+
+.adm-doc-row--ok {
+  background: rgba(16,185,129,0.05);
+  border-color: rgba(16,185,129,0.2);
+}
+
+.adm-doc-icon { font-size: 1rem; flex-shrink: 0; }
+
+.adm-doc-name {
+  flex: 1;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.adm-doc-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.adm-doc-row--ok .adm-doc-status {
+  background: rgba(16,185,129,0.12);
+  color: #065f46;
+}
+
+.adm-doc-row:not(.adm-doc-row--ok) .adm-doc-status {
+  background: rgba(239,68,68,0.1);
+  color: #991b1b;
+}
+
+/* Panel Footer */
+.adm-panel-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+@keyframes saFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

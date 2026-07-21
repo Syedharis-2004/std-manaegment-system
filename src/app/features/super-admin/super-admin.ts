@@ -17,8 +17,6 @@ import {
   LucideCheckCircle,
   LucideClock,
   LucideSearch,
-  LucideFilter,
-  LucideMoreVertical,
   LucideStar,
   LucideUserCog
 } from '@lucide/angular';
@@ -45,8 +43,6 @@ type Page = 'dashboard' | 'class' | 'users' | 'admissions';
     LucideCheckCircle,
     LucideClock,
     LucideSearch,
-    LucideFilter,
-    LucideMoreVertical,
     LucideStar,
     LucideUserCog
   ],

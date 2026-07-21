@@ -62,35 +62,80 @@
         </div>
       </div>
 
-      <!-- Pending Admissions -->
-      <div class="glass-card full-width-card" style="margin-top:2rem;">
-        <div class="card-title-bar">
-          <h3>Pending Admissions Queue</h3>
-          <span class="badge warning">{{ pendingAdmissions().length }} Pending</span>
+      <!-- Pending Admissions Queue Enhanced -->
+      <div class="glass-card full-width-card adm-queue-card" style="margin-top:2rem;">
+
+        <!-- Header Row -->
+        <div class="adm-queue-header">
+          <div class="adm-queue-title-group">
+            <h3>Pending Admissions Queue</h3>
+            <span class="badge warning">{{ filteredAdmissions().length }} of {{ pendingAdmissions().length }} Shown</span>
+          </div>
+          <div class="adm-queue-controls">
+            <div class="sa-table-search">
+              <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
+              <input
+                type="text"
+                placeholder="Search by name, class, dept…"
+                class="sa-search-input"
+                style="width:220px"
+                [value]="admissionSearchQuery()"
+                (input)="onAdmissionSearch($event)"
+              >
+            </div>
+            <select class="adm-filter-select" [value]="admissionDeptFilter()" (change)="onAdmissionDeptFilter($event)">
+              <option value="">All Departments</option>
+              <option value="Pre. Eng">Pre. Engineering</option>
+              <option value="Pre. Medical">Pre. Medical</option>
+              <option value="Comp. Science">Computer Science</option>
+              <option value="Commerce">Commerce</option>
+            </select>
+          </div>
         </div>
-        @if (pendingAdmissions().length === 0) {
+
+        <!-- Quick Stats Strip -->
+        <div class="adm-stats-strip">
+          <div class="adm-stat-chip amber">
+            <svg lucideClock style="width:0.95rem;height:0.95rem"></svg>
+            <span>{{ pendingAdmissions().length }} Total Pending</span>
+          </div>
+          <div class="adm-stat-chip blue">
+            <svg lucideUsers style="width:0.95rem;height:0.95rem"></svg>
+            <span>{{ getUniqueAdmissionDepts() }} Departments</span>
+          </div>
+          <div class="adm-stat-chip green">
+            <svg lucideCheckCircle style="width:0.95rem;height:0.95rem"></svg>
+            <span>All Docs Submitted</span>
+          </div>
+        </div>
+
+        @if (filteredAdmissions().length === 0) {
           <div class="empty-state">
             <svg lucideCheckCircle style="width:2.5rem;height:2.5rem;color:#10b981;margin-bottom:.5rem"></svg>
-            <p style="color:#a1a1aa;font-size:.95rem">No pending admission applications at this time.</p>
+            <p style="color:#a1a1aa;font-size:.95rem">
+              {{ pendingAdmissions().length === 0 ? 'No pending admission applications at this time.' : 'No results match your search.' }}
+            </p>
           </div>
         } @else {
           <div class="table-container">
-            <table class="admin-table">
+            <table class="admin-table adm-table">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>Student</th>
-                  <th>Contact Info</th>
+                  <th>Contact</th>
                   <th>Academic Choice</th>
                   <th>Documents</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                @for (a of pendingAdmissions(); track a.user_id) {
-                  <tr>
+                @for (a of filteredAdmissions(); track a.user_id; let i = $index) {
+                  <tr class="adm-row" [class.adm-row--highlight]="selectedAdmission()?.user_id === a.user_id">
+                    <td><span class="adm-seq">{{ i + 1 }}</span></td>
                     <td>
                       <div class="student-profile-cell">
-                        <div class="user-avatar-sm">{{ a.first_name?.charAt(0) }}{{ a.last_name?.charAt(0) }}</div>
+                        <div class="adm-avatar">{{ a.first_name?.charAt(0) | uppercase }}{{ a.last_name?.charAt(0) | uppercase }}</div>
                         <div>
                           <span class="adm-name">{{ a.first_name }} {{ a.middle_name || '' }} {{ a.last_name }}</span>
                           <span class="adm-father">S/O: {{ a.father_name }}</span>
@@ -100,31 +145,40 @@
                     <td>
                       <div class="adm-contact">
                         <span class="adm-email">{{ a.email || 'N/A' }}</span>
-                        <span class="adm-phone">📱 {{ a.whatsapp }}</span>
+                        <span class="adm-phone">
+                          <svg lucideSmartphone style="width:0.7rem;height:0.7rem"></svg>
+                          {{ a.whatsapp }}
+                        </span>
                       </div>
                     </td>
                     <td>
                       <div class="adm-academic">
-                        <span class="adm-class">{{ a.class_name }}</span>
+                        <span class="adm-class-chip">{{ a.class_name }}</span>
                         <span class="adm-dept">{{ a.department }}</span>
                       </div>
                     </td>
                     <td>
                       <div class="adm-docs">
-                        <span class="doc-file-tag" [title]="a.photo">🖼️ Photo</span>
-                        <span class="doc-file-tag" [title]="a.b_form">📄 B-Form</span>
-                        <span class="doc-file-tag" [title]="a.father_cnic">🪪 CNIC</span>
-                        <span class="doc-file-tag" [title]="a.last_result_card">📊 Result</span>
-                        <span class="doc-file-tag" [title]="a.character_certificate">📜 Character</span>
+                        <span class="doc-badge" [class.doc-badge--ok]="!!a.photo" [title]="a.photo || 'Not uploaded'">🖼️ Photo</span>
+                        <span class="doc-badge" [class.doc-badge--ok]="!!a.b_form" [title]="a.b_form || 'Not uploaded'">📄 B-Form</span>
+                        <span class="doc-badge" [class.doc-badge--ok]="!!a.father_cnic" [title]="a.father_cnic || 'Not uploaded'">🪪 CNIC</span>
+                        <span class="doc-badge" [class.doc-badge--ok]="!!a.last_result_card" [title]="a.last_result_card || 'Not uploaded'">📊 Result</span>
+                        <span class="doc-badge" [class.doc-badge--ok]="!!a.character_certificate" [title]="a.character_certificate || 'Not uploaded'">📜 Char.</span>
                       </div>
                     </td>
                     <td>
                       <div class="adm-actions">
+                        <button class="btn-view-adm" (click)="openAdmissionDetail(a)" title="View full application">
+                          <svg lucideEye style="width:0.85rem;height:0.85rem"></svg>
+                          View
+                        </button>
                         <button class="btn-approve" (click)="approveAdmission(a.user_id)">
-                          ✓ Approve
+                          <svg lucideCheck style="width:0.8rem;height:0.8rem"></svg>
+                          Approve
                         </button>
                         <button class="btn-reject" (click)="rejectAdmission(a.user_id)">
-                          ✕ Reject
+                          <svg lucideX style="width:0.8rem;height:0.8rem"></svg>
+                          Reject
                         </button>
                       </div>
                     </td>
@@ -135,6 +189,150 @@
           </div>
         }
       </div>
+
+      <!-- Admission Detail Side Panel -->
+      @if (showAdmissionDetail()) {
+        <div class="adm-panel-overlay" (click)="closeAdmissionDetail()"></div>
+        <div class="adm-detail-panel" [class.adm-detail-panel--open]="showAdmissionDetail()">
+          <div class="adm-panel-header">
+            <div class="adm-panel-title-group">
+              <div class="adm-panel-avatar">{{ selectedAdmission()?.first_name?.charAt(0) | uppercase }}{{ selectedAdmission()?.last_name?.charAt(0) | uppercase }}</div>
+              <div>
+                <h3>{{ selectedAdmission()?.first_name }} {{ selectedAdmission()?.middle_name || '' }} {{ selectedAdmission()?.last_name }}</h3>
+                <span class="badge warning" style="font-size:0.7rem">Pending Review</span>
+              </div>
+            </div>
+            <button class="btn-close" (click)="closeAdmissionDetail()">
+              <svg lucideXCircle></svg>
+            </button>
+          </div>
+
+          <div class="adm-panel-body">
+
+            <!-- Personal Info -->
+            <div class="adm-section">
+              <div class="adm-section-label">
+                <svg lucideUser style="width:0.9rem;height:0.9rem"></svg>
+                Personal Information
+              </div>
+              <div class="adm-detail-grid">
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Full Name</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.first_name }} {{ selectedAdmission()?.middle_name || '' }} {{ selectedAdmission()?.last_name }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Father's Name</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.father_name }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Date of Birth</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.dob || '—' }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Gender</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.gender || '—' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="adm-section">
+              <div class="adm-section-label">
+                <svg lucidePhone style="width:0.9rem;height:0.9rem"></svg>
+                Contact Details
+              </div>
+              <div class="adm-detail-grid">
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Email</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.email || '—' }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">WhatsApp</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.whatsapp || '—' }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Address</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.address || '—' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Academic Choice -->
+            <div class="adm-section">
+              <div class="adm-section-label">
+                <svg lucideSchool style="width:0.9rem;height:0.9rem"></svg>
+                Academic Choice
+              </div>
+              <div class="adm-detail-grid">
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Desired Class</span>
+                  <span class="adm-detail-val"><span class="code-chip">{{ selectedAdmission()?.class_name || '—' }}</span></span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Department</span>
+                  <span class="adm-detail-val" style="color:var(--accent-secondary)">{{ selectedAdmission()?.department || '—' }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Previous School</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.previous_school || '—' }}</span>
+                </div>
+                <div class="adm-detail-item">
+                  <span class="adm-detail-key">Last Result %</span>
+                  <span class="adm-detail-val">{{ selectedAdmission()?.last_result_percentage || '—' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Documents Checklist -->
+            <div class="adm-section">
+              <div class="adm-section-label">
+                <svg lucideFileText style="width:0.9rem;height:0.9rem"></svg>
+                Submitted Documents
+              </div>
+              <div class="adm-doc-list">
+                <div class="adm-doc-row" [class.adm-doc-row--ok]="!!selectedAdmission()?.photo">
+                  <span class="adm-doc-icon">{{ selectedAdmission()?.photo ? '✅' : '❌' }}</span>
+                  <span class="adm-doc-name">Student Photo</span>
+                  <span class="adm-doc-status">{{ selectedAdmission()?.photo ? 'Uploaded' : 'Missing' }}</span>
+                </div>
+                <div class="adm-doc-row" [class.adm-doc-row--ok]="!!selectedAdmission()?.b_form">
+                  <span class="adm-doc-icon">{{ selectedAdmission()?.b_form ? '✅' : '❌' }}</span>
+                  <span class="adm-doc-name">B-Form / CNIC</span>
+                  <span class="adm-doc-status">{{ selectedAdmission()?.b_form ? 'Uploaded' : 'Missing' }}</span>
+                </div>
+                <div class="adm-doc-row" [class.adm-doc-row--ok]="!!selectedAdmission()?.father_cnic">
+                  <span class="adm-doc-icon">{{ selectedAdmission()?.father_cnic ? '✅' : '❌' }}</span>
+                  <span class="adm-doc-name">Father's CNIC</span>
+                  <span class="adm-doc-status">{{ selectedAdmission()?.father_cnic ? 'Uploaded' : 'Missing' }}</span>
+                </div>
+                <div class="adm-doc-row" [class.adm-doc-row--ok]="!!selectedAdmission()?.last_result_card">
+                  <span class="adm-doc-icon">{{ selectedAdmission()?.last_result_card ? '✅' : '❌' }}</span>
+                  <span class="adm-doc-name">Last Result Card</span>
+                  <span class="adm-doc-status">{{ selectedAdmission()?.last_result_card ? 'Uploaded' : 'Missing' }}</span>
+                </div>
+                <div class="adm-doc-row" [class.adm-doc-row--ok]="!!selectedAdmission()?.character_certificate">
+                  <span class="adm-doc-icon">{{ selectedAdmission()?.character_certificate ? '✅' : '❌' }}</span>
+                  <span class="adm-doc-name">Character Certificate</span>
+                  <span class="adm-doc-status">{{ selectedAdmission()?.character_certificate ? 'Uploaded' : 'Missing' }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Panel Footer Actions -->
+          <div class="adm-panel-footer">
+            <button class="btn-reject" style="flex:1" (click)="rejectAdmission(selectedAdmission()!.user_id); closeAdmissionDetail()">
+              <svg lucideX style="width:0.85rem;height:0.85rem"></svg>
+              Reject Application
+            </button>
+            <button class="btn-approve" style="flex:1" (click)="approveAdmission(selectedAdmission()!.user_id); closeAdmissionDetail()">
+              <svg lucideCheck style="width:0.85rem;height:0.85rem"></svg>
+              Approve &amp; Enroll
+            </button>
+          </div>
+        </div>
+      }
 
 
       <!-- System Logs -->
@@ -185,6 +383,7 @@
                 <th>Class</th>
                 <th>Status</th>
                 <th>Fee</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -213,6 +412,12 @@
                       [class.overdue]="s.fee === 'Overdue'">
                       {{ s.fee }}
                     </span>
+                  </td>
+                  <td>
+                    <button class="btn-view-adm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;margin-right:0.3rem;" (click)="viewStudentDetail(s.id)">
+                      <svg lucideEye style="width:0.75rem;height:0.75rem"></svg> View
+                    </button>
+                    <button class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;" (click)="toggleStudentStatus(s.id, s.status)">Toggle Status</button>
                   </td>
                 </tr>
               }
@@ -250,6 +455,7 @@
                 <th>Email</th>
                 <th>Status</th>
                 <th>Today</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -277,6 +483,12 @@
                       [class.overdue]="!t.todayPresent">
                       {{ t.todayPresent ? 'Present' : 'Absent' }}
                     </span>
+                  </td>
+                  <td>
+                    <button class="btn-view-adm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;margin-right:0.3rem;" (click)="viewTeacherDetail(t.id)">
+                      <svg lucideEye style="width:0.75rem;height:0.75rem"></svg> View
+                    </button>
+                    <button class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;" (click)="toggleTeacherStatus(t.id, t.status)">Toggle Status</button>
                   </td>
                 </tr>
               }
@@ -307,7 +519,7 @@
         <div class="table-container">
           <table class="admin-table">
             <thead>
-              <tr><th>ID</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr>
+              <tr><th>ID</th><th>Name</th><th>Role</th><th>Email</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
               @for (m of filteredStaff; track m.id) {
@@ -327,6 +539,12 @@
                       [class.overdue]="m.status === 'inactive'">
                       {{ m.status | titlecase }}
                     </span>
+                  </td>
+                  <td>
+                    <button class="btn-view-adm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;margin-right:0.3rem;" (click)="viewStaffDetail(m.id)">
+                      <svg lucideEye style="width:0.75rem;height:0.75rem"></svg> View
+                    </button>
+                    <button class="btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;" (click)="toggleStaffStatus(m.id, m.status)">Toggle Status</button>
                   </td>
                 </tr>
               }
@@ -348,15 +566,18 @@
             <h3>Class Directory</h3>
             <span class="badge blue">{{ filteredClasses.length }} Sections</span>
           </div>
-          <div class="sa-table-search">
-            <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
-            <input type="text" placeholder="Search classes..." class="sa-search-input" [value]="classSearchQuery" (input)="onClassSearch($event)">
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <div class="sa-table-search">
+              <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
+              <input type="text" placeholder="Search classes..." class="sa-search-input" [value]="classSearchQuery" (input)="onClassSearch($event)">
+            </div>
+            <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: 8px;" (click)="openCreateModal('class')">+ New Class</button>
           </div>
         </div>
         <div class="table-container">
           <table class="admin-table">
             <thead>
-              <tr><th>Class ID</th><th>Program</th><th>Semester</th><th>Students</th><th>Class Teacher</th><th>Room</th></tr>
+              <tr><th>Class ID</th><th>Program</th><th>Semester</th><th>Students</th><th>Class Teacher</th><th>Room</th><th>Actions</th></tr>
             </thead>
             <tbody>
               @for (c of filteredClasses; track c.id) {
@@ -367,6 +588,12 @@
                   <td>{{ c.students }}</td>
                   <td>{{ c.teacher }}</td>
                   <td><span class="code-chip">{{ c.room }}</span></td>
+                  <td>
+                    <button class="btn-view-adm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;margin-right:0.3rem;" (click)="openEditClassModal(c)">
+                      Edit
+                    </button>
+                    <button class="btn-reject" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px;" (click)="deleteClass(c.id)">Delete</button>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -537,44 +764,276 @@
     </div>
   </div>
 
-  <!-- Create User Modal -->
+  <!-- ========== CREATE MODAL ========== -->
   <div class="modal-overlay" *ngIf="showCreateModal()" (click)="closeCreateModal()">
-    <div class="modal-content glass-card" (click)="$event.stopPropagation()">
+    <div class="modal-content glass-card" style="max-width:600px;max-height:85vh;overflow-y:auto;" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Create New {{ createUserRole() | titlecase }}</h2>
         <button class="btn-close" (click)="closeCreateModal()"><svg lucideXCircle></svg></button>
       </div>
       <div class="modal-body">
         <form (ngSubmit)="onCreateUserSubmit()" ngNativeValidate>
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" [(ngModel)]="newUser.name" name="name" required class="sa-search-input modal-input" placeholder="Enter full name">
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="newUser.email" name="email" required class="sa-search-input modal-input" placeholder="Enter email address">
+
+          <!-- ---- TEACHER FORM ---- -->
+          <div *ngIf="createUserRole() === 'teacher'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" [(ngModel)]="newTeacher.first_name" name="t_first" required class="sa-search-input modal-input" placeholder="First name">
+            </div>
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input type="text" [(ngModel)]="newTeacher.middle_name" name="t_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" [(ngModel)]="newTeacher.last_name" name="t_last" required class="sa-search-input modal-input" placeholder="Last name">
+            </div>
+            <div class="form-group">
+              <label>Father's Name *</label>
+              <input type="text" [(ngModel)]="newTeacher.father_name" name="t_father" required class="sa-search-input modal-input" placeholder="Father's name">
+            </div>
+            <div class="form-group">
+              <label>Mobile *</label>
+              <input type="text" [(ngModel)]="newTeacher.mobile_number" name="t_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="newTeacher.email" name="t_email" required class="sa-search-input modal-input" placeholder="Email address">
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input type="password" [(ngModel)]="newTeacher.password" name="t_pass" required class="sa-search-input modal-input" placeholder="Password">
+            </div>
+            <div class="form-group">
+              <label>Confirm Password *</label>
+              <input type="password" [(ngModel)]="newTeacher.confirm_password" name="t_cpass" required class="sa-search-input modal-input" placeholder="Confirm password">
+            </div>
+            <div class="form-group">
+              <label>CNIC *</label>
+              <input type="text" [(ngModel)]="newTeacher.cnic" name="t_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
+            </div>
+            <div class="form-group">
+              <label>Subject *</label>
+              <input type="text" [(ngModel)]="newTeacher.subject" name="t_subject" required class="sa-search-input modal-input" placeholder="e.g. Mathematics">
+            </div>
+            <div class="form-group">
+              <label>Qualification *</label>
+              <input type="text" [(ngModel)]="newTeacher.qualification" name="t_qual" required class="sa-search-input modal-input" placeholder="e.g. Masters">
+            </div>
+            <div class="form-group">
+              <label>Experience *</label>
+              <input type="text" [(ngModel)]="newTeacher.experience" name="t_exp" required class="sa-search-input modal-input" placeholder="e.g. 3 Years">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Address *</label>
+              <input type="text" [(ngModel)]="newTeacher.address" name="t_addr" required class="sa-search-input modal-input" placeholder="Full address">
+            </div>
           </div>
 
-          <div *ngIf="createUserRole() === 'student'" class="form-group">
-            <label>Class Section</label>
-            <input type="text" [(ngModel)]="newUser.class" name="class" required class="sa-search-input modal-input" placeholder="e.g. CS-4A">
+          <!-- ---- STAFF FORM ---- -->
+          <div *ngIf="createUserRole() === 'staff'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" [(ngModel)]="newStaff.first_name" name="s_first" required class="sa-search-input modal-input" placeholder="First name">
+            </div>
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input type="text" [(ngModel)]="newStaff.middle_name" name="s_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" [(ngModel)]="newStaff.last_name" name="s_last" required class="sa-search-input modal-input" placeholder="Last name">
+            </div>
+            <div class="form-group">
+              <label>Father's Name *</label>
+              <input type="text" [(ngModel)]="newStaff.father_name" name="s_father" required class="sa-search-input modal-input" placeholder="Father's name">
+            </div>
+            <div class="form-group">
+              <label>Mobile *</label>
+              <input type="text" [(ngModel)]="newStaff.mobile_number" name="s_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="newStaff.email" name="s_email" required class="sa-search-input modal-input" placeholder="Email address">
+            </div>
+            <div class="form-group">
+              <label>CNIC *</label>
+              <input type="text" [(ngModel)]="newStaff.cnic" name="s_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
+            </div>
+            <div class="form-group">
+              <label>Designation *</label>
+              <input type="text" [(ngModel)]="newStaff.designation" name="s_designation" required class="sa-search-input modal-input" placeholder="e.g. Librarian">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Address *</label>
+              <input type="text" [(ngModel)]="newStaff.address" name="s_addr" required class="sa-search-input modal-input" placeholder="Full address">
+            </div>
           </div>
 
-          <div *ngIf="createUserRole() === 'teacher'" class="form-group">
-            <label>Subject</label>
-            <input type="text" [(ngModel)]="newUser.subject" name="subject" required class="sa-search-input modal-input" placeholder="e.g. Database Systems">
+          <!-- ---- CLASS FORM ---- -->
+          <div *ngIf="createUserRole() === 'class'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+            <div class="form-group">
+              <label>Class Name *</label>
+              <input type="text" [(ngModel)]="newClass.class_name" name="c_name" required class="sa-search-input modal-input" placeholder="e.g. 9, 10, FA, FSC">
+            </div>
+            <div class="form-group">
+              <label>Section *</label>
+              <input type="text" [(ngModel)]="newClass.section_name" name="c_section" required class="sa-search-input modal-input" placeholder="e.g. A, B, C">
+            </div>
+            <div class="form-group">
+              <label>Starting GR # *</label>
+              <input type="text" [(ngModel)]="newClass.starting_gr" name="c_gr" required class="sa-search-input modal-input" placeholder="e.g. 2025-9A-001">
+            </div>
+            <div class="form-group">
+              <label>Status *</label>
+              <select [(ngModel)]="newClass.status" name="c_status" class="sa-search-input modal-input">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Start Time *</label>
+              <input type="time" [(ngModel)]="newClass.start_time" name="c_start" required class="sa-search-input modal-input">
+            </div>
+            <div class="form-group">
+              <label>End Time *</label>
+              <input type="time" [(ngModel)]="newClass.end_time" name="c_end" required class="sa-search-input modal-input">
+            </div>
           </div>
 
-          <div *ngIf="createUserRole() === 'staff'" class="form-group">
-            <label>Role</label>
-            <input type="text" [(ngModel)]="newUser.role" name="role" required class="sa-search-input modal-input" placeholder="e.g. Librarian">
+          <!-- ---- STUDENT FORM ---- -->
+          <div *ngIf="createUserRole() === 'student'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" [(ngModel)]="newStudent.first_name" name="stu_first" required class="sa-search-input modal-input" placeholder="First name">
+            </div>
+            <div class="form-group">
+              <label>Middle Name</label>
+              <input type="text" [(ngModel)]="newStudent.middle_name" name="stu_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+            </div>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" [(ngModel)]="newStudent.last_name" name="stu_last" required class="sa-search-input modal-input" placeholder="Last name">
+            </div>
+            <div class="form-group">
+              <label>Father's Name *</label>
+              <input type="text" [(ngModel)]="newStudent.father_name" name="stu_father" required class="sa-search-input modal-input" placeholder="Father's name">
+            </div>
+            <div class="form-group">
+              <label>Mobile *</label>
+              <input type="text" [(ngModel)]="newStudent.mobile_number" name="stu_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="newStudent.email" name="stu_email" class="sa-search-input modal-input" placeholder="Email address (optional)">
+            </div>
+            <div class="form-group">
+              <label>Password *</label>
+              <input type="password" [(ngModel)]="newStudent.password" name="stu_pass" required class="sa-search-input modal-input" placeholder="Password">
+            </div>
+            <div class="form-group">
+              <label>Confirm Password *</label>
+              <input type="password" [(ngModel)]="newStudent.confirm_password" name="stu_cpass" required class="sa-search-input modal-input" placeholder="Confirm password">
+            </div>
           </div>
 
-          <div class="modal-actions">
+          <div class="modal-actions" style="margin-top:1.2rem;">
             <button type="button" class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
             <button type="submit" class="btn-primary">Create {{ createUserRole() | titlecase }}</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EDIT CLASS MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showEditClassModal()" (click)="closeEditClassModal()">
+    <div class="modal-content glass-card" style="max-width:450px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Class — {{ editingClass()?.program }}</h2>
+        <button class="btn-close" (click)="closeEditClassModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="onEditClassSubmit()" ngNativeValidate>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+            <div class="form-group">
+              <label>Start Time *</label>
+              <input type="time" [(ngModel)]="editClassForm.start_time" name="ec_start" required class="sa-search-input modal-input">
+            </div>
+            <div class="form-group">
+              <label>End Time *</label>
+              <input type="time" [(ngModel)]="editClassForm.end_time" name="ec_end" required class="sa-search-input modal-input">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>Status *</label>
+              <select [(ngModel)]="editClassForm.status" name="ec_status" class="sa-search-input modal-input">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-actions" style="margin-top:1rem;">
+            <button type="button" class="btn-secondary" (click)="closeEditClassModal()">Cancel</button>
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== STUDENT DETAIL MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showStudentDetail()" (click)="closeStudentDetail()">
+    <div class="modal-content glass-card" style="max-width:520px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Student Details</h2>
+        <button class="btn-close" (click)="closeStudentDetail()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body adm-detail-grid" *ngIf="selectedStudent()">
+        <div class="adm-detail-item"><span class="adm-detail-key">Name</span><span class="adm-detail-val">{{ selectedStudent()?.first_name }} {{ selectedStudent()?.middle_name || '' }} {{ selectedStudent()?.last_name }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">GR #</span><span class="adm-detail-val">{{ selectedStudent()?.gr_number || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Class</span><span class="adm-detail-val">{{ selectedStudent()?.class_name }}-{{ selectedStudent()?.section }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Department</span><span class="adm-detail-val">{{ selectedStudent()?.department || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Mobile</span><span class="adm-detail-val">{{ selectedStudent()?.mobile_number || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Status</span><span class="adm-detail-val">{{ selectedStudent()?.student_status || '—' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TEACHER DETAIL MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showTeacherDetail()" (click)="closeTeacherDetail()">
+    <div class="modal-content glass-card" style="max-width:520px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Teacher Details</h2>
+        <button class="btn-close" (click)="closeTeacherDetail()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body adm-detail-grid" *ngIf="selectedTeacher()">
+        <div class="adm-detail-item"><span class="adm-detail-key">Name</span><span class="adm-detail-val">{{ selectedTeacher()?.first_name }} {{ selectedTeacher()?.middle_name || '' }} {{ selectedTeacher()?.last_name }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Subject</span><span class="adm-detail-val">{{ selectedTeacher()?.subject || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Mobile</span><span class="adm-detail-val">{{ selectedTeacher()?.mobile_number || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">CNIC</span><span class="adm-detail-val">{{ selectedTeacher()?.cnic || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Qualification</span><span class="adm-detail-val">{{ selectedTeacher()?.qualification || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Experience</span><span class="adm-detail-val">{{ selectedTeacher()?.experience || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Status</span><span class="adm-detail-val">{{ selectedTeacher()?.teacher_status || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Address</span><span class="adm-detail-val">{{ selectedTeacher()?.address || '—' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== STAFF DETAIL MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showStaffDetail()" (click)="closeStaffDetail()">
+    <div class="modal-content glass-card" style="max-width:520px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Staff Details</h2>
+        <button class="btn-close" (click)="closeStaffDetail()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body adm-detail-grid" *ngIf="selectedStaffMember()">
+        <div class="adm-detail-item"><span class="adm-detail-key">Name</span><span class="adm-detail-val">{{ selectedStaffMember()?.first_name }} {{ selectedStaffMember()?.middle_name || '' }} {{ selectedStaffMember()?.last_name }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Designation</span><span class="adm-detail-val">{{ selectedStaffMember()?.designation || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Mobile</span><span class="adm-detail-val">{{ selectedStaffMember()?.mobile_number || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">CNIC</span><span class="adm-detail-val">{{ selectedStaffMember()?.cnic || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Father Name</span><span class="adm-detail-val">{{ selectedStaffMember()?.father_name || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Status</span><span class="adm-detail-val">{{ selectedStaffMember()?.staff_status || '—' }}</span></div>
+        <div class="adm-detail-item"><span class="adm-detail-key">Address</span><span class="adm-detail-val">{{ selectedStaffMember()?.address || '—' }}</span></div>
       </div>
     </div>
   </div>

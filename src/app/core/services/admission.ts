@@ -18,10 +18,16 @@ export class AdmissionService {
   }
 
   approveAdmission(userId: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/admission/approve/${userId}`, {});
+    const formData = new FormData();
+    formData.append('status', 'APPROVED');
+    formData.append('remarks', 'Approved by administrator');
+    return this.http.put<any>(`${this.apiUrl}/admission/review/${userId}`, formData);
   }
 
   rejectAdmission(userId: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/admission/reject/${userId}`);
+    const formData = new FormData();
+    formData.append('status', 'REJECTED');
+    formData.append('remarks', 'Rejected by administrator');
+    return this.http.put<any>(`${this.apiUrl}/admission/review/${userId}`, formData);
   }
 }

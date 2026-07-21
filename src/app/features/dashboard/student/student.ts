@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
+import { StudentService } from '../../../core/services/student';
 
 import {
   LucideCheckCircle,
@@ -42,6 +43,7 @@ import {
 export class StudentDashboard implements OnInit {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private studentService = inject(StudentService);
   private router = inject(Router);
   private apiUrl = 'http://localhost:8000';
 
@@ -54,6 +56,9 @@ export class StudentDashboard implements OnInit {
 
   // Admission reminder modal
   showAdmissionModal = signal<boolean>(false);
+
+  // Real class info
+  myClassInfo = signal<{ class_name?: string; section?: string; department?: string; gr_number?: string } | null>(null);
 
   // Selected teacher for info panel
   selectedTeacher = signal<any>(null);
@@ -189,6 +194,19 @@ export class StudentDashboard implements OnInit {
       next: (profile) => {
         if (profile?.admission_status === 'NOT_SUBMITTED') {
           this.showAdmissionModal.set(true);
+        } else if (profile?.admission_status === 'APPROVED') {
+          // Fetch actual class details
+          this.studentService.getStudentDetails(profile.id).subscribe({
+            next: (details) => {
+              this.myClassInfo.set({
+                class_name: details.class_name,
+                section: details.section,
+                department: details.department,
+                gr_number: details.gr_number
+              });
+            },
+            error: () => console.error("Could not fetch real class details")
+          });
         }
       },
       error: () => {

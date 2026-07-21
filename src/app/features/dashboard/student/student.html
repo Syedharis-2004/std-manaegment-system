@@ -54,7 +54,8 @@
         </div>
         <div class="page-hero-text">
           <h2>My Class</h2>
-          <p>Spring 2026 — Bachelor of Computer Science (Year 3)</p>
+          <p *ngIf="myClassInfo()">{{ myClassInfo()?.department }} — {{ myClassInfo()?.class_name }} (Section {{ myClassInfo()?.section }})</p>
+          <p *ngIf="!myClassInfo()">Spring 2026 — Bachelor of Computer Science (Year 3)</p>
         </div>
         <span class="badge blue">Active Semester</span>
       </div>

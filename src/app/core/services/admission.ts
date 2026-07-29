@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AdmissionService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
 
   submitAdmission(formData: FormData): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admission/`, formData);

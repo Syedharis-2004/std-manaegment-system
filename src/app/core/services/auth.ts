@@ -20,7 +20,7 @@ export interface User {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
   
   // Reactive state management using Angular Signals
   currentUser = signal<User | null>(null);

@@ -38,7 +38,7 @@ export class AdminDashboard implements OnInit {
   private staffService = inject(StaffService);
   private teacherService = inject(TeacherService);
   private authService = inject(AuthService);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
 
   // Two-way binding from parent sidebar
   activePage = model<string>('dashboard');

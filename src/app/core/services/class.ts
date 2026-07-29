@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ClassService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
 
   getClasses(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/classes/`);

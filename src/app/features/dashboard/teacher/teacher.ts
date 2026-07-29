@@ -12,7 +12,7 @@ import { LucideBookOpen, LucideEdit, LucideStar } from '@lucide/angular';
 })
 export class TeacherDashboard implements OnInit {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
 
   backendMessage = signal<string>('Verifying teacher access...');
   isAuthorized = signal<boolean>(false);

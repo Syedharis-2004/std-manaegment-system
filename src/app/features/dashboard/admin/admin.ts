@@ -5,15 +5,19 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth';
 import { AdmissionService } from '../../../core/services/admission';
 import { StudentService } from '../../../core/services/student';
-import { ClassService } from '../../../core/services/class';
+import { ClassService, TimetableRequest, UpdateSlot, CopyTimetable, TeacherStatus, ClassStatus, SlotType } from '../../../core/services/class';
 import { StaffService } from '../../../core/services/staff';
 import { TeacherService } from '../../../core/services/teacher';
+import { FeeService } from '../../../core/services/fee';
+import { TestScheduleService } from '../../../core/services/test-schedule';
+import { environment } from '@env/environment';
 import {
   LucideUsers, LucideUserCheck,
   LucideSchool, LucideCreditCard, LucideUpload, LucideCheckCircle,
   LucideXCircle, LucideUserCog, LucideClock, LucideSearch,
   LucideEye, LucideCheck, LucideX, LucideSmartphone,
-  LucideUser, LucidePhone, LucideFileText
+  LucideUser, LucidePhone, LucideFileText,
+  LucideCalendar, LucideClipboardList, LucidePlus
 } from '@lucide/angular';
 
 @Component({
@@ -25,7 +29,8 @@ import {
     LucideSchool, LucideCreditCard, LucideUpload, LucideCheckCircle,
     LucideXCircle, LucideUserCog, LucideClock, LucideSearch,
     LucideEye, LucideCheck, LucideX, LucideSmartphone,
-    LucideUser, LucidePhone, LucideFileText
+    LucideUser, LucidePhone, LucideFileText,
+    LucideCalendar, LucideClipboardList, LucidePlus
   ],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
@@ -37,8 +42,10 @@ export class AdminDashboard implements OnInit {
   private classService = inject(ClassService);
   private staffService = inject(StaffService);
   private teacherService = inject(TeacherService);
+  private feeService = inject(FeeService);
+  private testScheduleService = inject(TestScheduleService);
   private authService = inject(AuthService);
-  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
+  private apiUrl = environment.apiUrl;
 
   // Two-way binding from parent sidebar
   activePage = model<string>('dashboard');
@@ -58,14 +65,7 @@ export class AdminDashboard implements OnInit {
   staff = signal<any[]>([]);
   classes = signal<any[]>([]);
 
-  // Fee records mock data
-  feeRecords = signal([
-    { id: 'S-001', name: 'Alice Smith',  class: 'CS-4A', amount: 45000, paid: 45000, due: 0,     status: 'Paid',    dueDate: 'Jan 15, 2026' },
-    { id: 'S-002', name: 'John Doe',     class: 'CS-3B', amount: 45000, paid: 0,     due: 45000, status: 'Pending', dueDate: 'Jan 15, 2026' },
-    { id: 'S-003', name: 'Fatima Noor', class: 'SE-2A', amount: 42000, paid: 42000, due: 0,     status: 'Paid',    dueDate: 'Jan 15, 2026' },
-    { id: 'S-004', name: 'Ali Hassan',   class: 'CS-4A', amount: 45000, paid: 20000, due: 25000, status: 'Overdue', dueDate: 'Dec 31, 2025' },
-    { id: 'S-005', name: 'Sara Malik',   class: 'IT-1B', amount: 38000, paid: 38000, due: 0,     status: 'Paid',    dueDate: 'Jan 15, 2026' }
-  ]);
+
 
   uploadCategory = signal<string>('students');
   uploadFile = signal<File | null>(null);
@@ -283,6 +283,303 @@ export class AdminDashboard implements OnInit {
     setTimeout(() => this.selectedStaffMember.set(null), 200);
   }
 
+  // ── Fee Management ──────────────────────────────────────
+  allVouchers = signal<any[]>([]);
+  showGenerateVoucherModal = signal<boolean>(false);
+  newVoucher = { gr_number: '', month: 'August', year: new Date().getFullYear(), amount: 5000 };
+  showConfirmPaymentModal = signal<boolean>(false);
+  confirmPayment = { gr_number: '' };
+
+  loadAllVouchers(): void {
+    this.feeService.getAllVouchers().subscribe({
+      next: (data) => this.allVouchers.set(data),
+      error: (err) => console.error('Failed to load vouchers', err)
+    });
+  }
+
+  openGenerateVoucherModal(): void {
+    this.newVoucher = { gr_number: '', month: 'August', year: new Date().getFullYear(), amount: 5000 };
+    this.showGenerateVoucherModal.set(true);
+  }
+  closeGenerateVoucherModal(): void { this.showGenerateVoucherModal.set(false); }
+
+  submitGenerateVoucher(): void {
+    if (!this.newVoucher.gr_number.trim()) {
+      this.showToast('GR Number is required');
+      return;
+    }
+    this.feeService.generateVoucher(this.newVoucher).subscribe({
+      next: (res) => { this.showToast(res.message || 'Voucher generated!'); this.closeGenerateVoucherModal(); this.loadAllVouchers(); },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to generate voucher')
+    });
+  }
+
+  openConfirmPaymentModal(): void {
+    this.confirmPayment = { gr_number: '' };
+    this.showConfirmPaymentModal.set(true);
+  }
+  closeConfirmPaymentModal(): void { this.showConfirmPaymentModal.set(false); }
+
+  submitConfirmPayment(): void {
+    if (!this.confirmPayment.gr_number.trim()) {
+      this.showToast('GR Number is required');
+      return;
+    }
+    this.feeService.confirmPayment(this.confirmPayment).subscribe({
+      next: (res) => { this.showToast(res.message || 'Payment confirmed!'); this.closeConfirmPaymentModal(); this.loadAllVouchers(); },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to confirm payment')
+    });
+  }
+
+
+  // ── Timetable Manager ───────────────────────────────────
+  timetableSelectedClassId = signal<string>('');
+  timetableData = signal<any>(null);
+  timetableLoading = signal<boolean>(false);
+  showCopyTimetableModal = signal<boolean>(false);
+  copyTimetableForm: CopyTimetable = { source_class_id: '', destination_class_id: '', overwrite: false };
+
+  loadTimetable(classId: string): void {
+    if (!classId) return;
+    this.timetableSelectedClassId.set(classId);
+    this.timetableLoading.set(true);
+    this.classService.getTimetable(classId).subscribe({
+      next: (data) => {
+        // Backend returns: { class_name, section_name, timetable: { working_days, periods, schedule } }
+        const tt = data?.timetable ? { ...data.timetable, class_name: data.class_name, section_name: data.section_name } : data;
+        this.timetableData.set(tt);
+        this.timetableLoading.set(false);
+      },
+      error: () => {
+        this.timetableData.set(null);
+        this.timetableLoading.set(false);
+      }
+    });
+  }
+
+  deleteTimetable(): void {
+    const id = this.timetableSelectedClassId();
+    if (!id || !confirm('Delete entire timetable for this class?')) return;
+    this.classService.deleteTimetable(id).subscribe({
+      next: (res) => { this.showToast(res.message || 'Timetable deleted'); this.timetableData.set(null); },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to delete timetable')
+    });
+  }
+
+  openCopyTimetableModal(): void {
+    this.copyTimetableForm = { source_class_id: this.timetableSelectedClassId(), destination_class_id: '', overwrite: false };
+    this.showCopyTimetableModal.set(true);
+  }
+  closeCopyTimetableModal(): void { this.showCopyTimetableModal.set(false); }
+
+  submitCopyTimetable(): void {
+    if (!this.copyTimetableForm.destination_class_id) {
+      this.showToast('Please select a destination class');
+      return;
+    }
+    this.classService.copyTimetable(this.copyTimetableForm).subscribe({
+      next: (res) => {
+        this.showToast(res.message || 'Timetable copied successfully!');
+        this.closeCopyTimetableModal();
+      },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to copy timetable')
+    });
+  }
+
+  createQuickTimetable(): void {
+    const classId = this.timetableSelectedClassId();
+    if (!classId) return;
+
+    const workingDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const periods = [
+      { period_no: 1, start_time: '09:00', end_time: '10:00' },
+      { period_no: 2, start_time: '10:00', end_time: '11:00' },
+      { period_no: 3, start_time: '11:00', end_time: '12:00' },
+      { period_no: 4, start_time: '12:00', end_time: '13:00' }
+    ];
+
+    const schedule: any[] = [];
+    workingDays.forEach(day => {
+      periods.forEach(p => {
+        if (p.period_no === 4) {
+          schedule.push({
+            day,
+            period_no: p.period_no,
+            subject: 'Weekly Assessment',
+            teacher_id: 'SYSTEM',
+            teacher_name: 'Evaluator',
+            teacher_status: 'ACTIVE',
+            class_status: 'ACTIVE',
+            slot_type: 'Test'
+          });
+        } else {
+          schedule.push({
+            day,
+            period_no: p.period_no,
+            subject: p.period_no === 1 ? 'Mathematics' : (p.period_no === 2 ? 'Physics' : 'Computer Science'),
+            teacher_id: 'SYSTEM',
+            teacher_name: 'Faculty Member',
+            teacher_status: 'ACTIVE',
+            class_status: 'ACTIVE',
+            slot_type: 'Lecture'
+          });
+        }
+      });
+    });
+
+    const payload: TimetableRequest = {
+      working_days: workingDays,
+      periods,
+      schedule
+    };
+
+    this.classService.saveTimetable(classId, payload).subscribe({
+      next: (res) => {
+        this.showToast(res.message || 'Default timetable created!');
+        this.loadTimetable(classId);
+      },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to save timetable: ' + (err.error?.detail || err.message))
+    });
+  }
+
+
+  // ── Single Slot Editor (PUT /classes/{class_id}/timetable/slot) ──────────────
+  showEditSlotModal = signal<boolean>(false);
+  editSlotForm = {
+    day: '',
+    period_no: 1,
+    subject: '',
+    teacher_id: 'SYSTEM',
+    teacher_name: '',
+    teacher_status: 'ACTIVE' as TeacherStatus,
+    class_status: 'ACTIVE' as ClassStatus,
+    slot_type: 'Lecture' as SlotType
+  };
+
+  openEditSlotModal(slot: any, day: string, periodNo: number): void {
+    if (!slot) {
+      this.editSlotForm = {
+        day,
+        period_no: periodNo,
+        subject: '',
+        teacher_id: 'SYSTEM',
+        teacher_name: '',
+        teacher_status: 'ACTIVE',
+        class_status: 'ACTIVE',
+        slot_type: 'Lecture'
+      };
+    } else {
+      this.editSlotForm = {
+        day: slot.day,
+        period_no: slot.period_no,
+        subject: slot.subject || '',
+        teacher_id: slot.teacher_id || 'SYSTEM',
+        teacher_name: slot.teacher_name || '',
+        teacher_status: (slot.teacher_status || 'ACTIVE') as TeacherStatus,
+        class_status: (slot.class_status || 'ACTIVE') as ClassStatus,
+        slot_type: (slot.slot_type || 'Lecture') as SlotType
+      };
+    }
+    this.showEditSlotModal.set(true);
+  }
+
+  closeEditSlotModal(): void {
+    this.showEditSlotModal.set(false);
+  }
+
+  onSlotTypeChange(): void {
+    if (this.editSlotForm.slot_type === 'Break' || this.editSlotForm.slot_type === 'Free Period') {
+      this.editSlotForm.subject = '';
+      this.editSlotForm.teacher_id = '';
+      this.editSlotForm.teacher_name = '';
+    }
+  }
+
+  submitUpdateSlot(): void {
+    const classId = this.timetableSelectedClassId();
+    if (!classId) return;
+
+    const payload: UpdateSlot = {
+      day: this.editSlotForm.day,
+      period_no: Number(this.editSlotForm.period_no),
+      subject: this.editSlotForm.subject.trim(),
+      teacher_id: this.editSlotForm.teacher_id.trim() || 'SYSTEM',
+      teacher_name: this.editSlotForm.teacher_name.trim(),
+      teacher_status: this.editSlotForm.teacher_status,
+      class_status: this.editSlotForm.class_status,
+      slot_type: this.editSlotForm.slot_type
+    };
+
+    if (['Lecture', 'Practical', 'Test'].includes(payload.slot_type)) {
+      if (!payload.subject) {
+        this.showToast('Subject is required for ' + payload.slot_type);
+        return;
+      }
+      if (!payload.teacher_name) {
+        this.showToast('Teacher Name is required for ' + payload.slot_type);
+        return;
+      }
+    }
+
+    this.classService.updateSlot(classId, payload).subscribe({
+      next: (res) => {
+        this.showToast(res.message || 'Timetable slot updated successfully!');
+        this.closeEditSlotModal();
+        this.loadTimetable(classId);
+      },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to update slot')
+    });
+  }
+
+
+  getTimetableSlot(day: string, periodNo: number): any {
+    const schedule = this.timetableData()?.schedule || [];
+    return schedule.find((s: any) => s.day === day && s.period_no === periodNo) || null;
+  }
+
+  getSlotClass(slot: any): string {
+    if (!slot) return '';
+    const map: Record<string, string> = { 'Lecture': 'slot-lecture', 'Test': 'slot-test', 'Practical': 'slot-practical', 'Break': 'slot-break', 'Free Period': 'slot-free' };
+    return map[slot.slot_type] || '';
+  }
+
+
+  // ── Test Schedules ──────────────────────────────────────
+  testSchedules = signal<any[]>([]);
+  selectedSchedule = signal<any>(null);
+  showScheduleDetail = signal<boolean>(false);
+  showGenerateScheduleModal = signal<boolean>(false);
+  generateScheduleForm = { class_id: '', month: '', year: new Date().getFullYear(), test_type: 'Weekly' };
+
+  loadTestSchedules(): void {
+    this.testScheduleService.getAllSchedules().subscribe({
+      next: (data) => this.testSchedules.set(data),
+      error: (err) => console.error('Failed to load test schedules', err)
+    });
+  }
+
+  openGenerateScheduleModal(): void {
+    this.generateScheduleForm = { class_id: '', month: '', year: new Date().getFullYear(), test_type: 'Weekly' };
+    this.showGenerateScheduleModal.set(true);
+  }
+  closeGenerateScheduleModal(): void { this.showGenerateScheduleModal.set(false); }
+
+  submitGenerateSchedule(): void {
+    this.testScheduleService.generateSchedule(this.generateScheduleForm).subscribe({
+      next: (res) => { this.showToast(res.message || 'Schedule generated!'); this.closeGenerateScheduleModal(); this.loadTestSchedules(); },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to generate schedule')
+    });
+  }
+
+  openScheduleDetail(schedule: any): void {
+    this.testScheduleService.getSchedule(schedule._id).subscribe({
+      next: (data) => { this.selectedSchedule.set(data); this.showScheduleDetail.set(true); },
+      error: (err) => this.showToast(err.error?.detail || 'Failed to load schedule')
+    });
+  }
+
+  closeScheduleDetail(): void { this.showScheduleDetail.set(false); setTimeout(() => this.selectedSchedule.set(null), 200); }
+
   users = signal([
     { name: 'Dr. Sarah Connor', email: 'sconnor@institution.edu', role: 'teacher', status: 'active' },
     { name: 'Alice Smith',      email: 'asmith@student.edu',      role: 'student', status: 'active' },
@@ -351,6 +648,8 @@ export class AdminDashboard implements OnInit {
         this.isLoading.set(false);
         this.loadPendingAdmissions();
         this.loadDashboardData();
+        this.loadAllVouchers();
+        this.loadTestSchedules();
       },
       error: (err) => {
         this.backendMessage.set(err.error?.detail || 'Unauthorized administrator access!');

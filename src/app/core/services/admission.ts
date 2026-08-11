@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdmissionService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
+  private apiUrl = environment.apiUrl;
 
   submitAdmission(formData: FormData): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admission/`, formData);
@@ -29,5 +30,9 @@ export class AdmissionService {
     formData.append('status', 'REJECTED');
     formData.append('remarks', 'Rejected by administrator');
     return this.http.put<any>(`${this.apiUrl}/admission/review/${userId}`, formData);
+  }
+
+  getAdmissionDetails(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admission/details/${userId}`);
   }
 }

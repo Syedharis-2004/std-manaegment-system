@@ -1343,3 +1343,698 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ── Page Header Row ── */
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Form Select SM ── */
+.form-select-sm {
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: #fff;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+/* ── Button Variants ── */
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-primary-sm:hover { opacity: 0.88; }
+
+/* ── PREMIER TIMETABLE & TEST SCHEDULES STYLING ── */
+
+/* Hero Header Bar */
+.tt-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.95));
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.05);
+  border-radius: 20px;
+}
+
+.tt-hero-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.tt-hero-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.18));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.15);
+}
+
+.purple-hero-icon {
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.18));
+  box-shadow: 0 4px 14px rgba(139,92,246,0.15);
+}
+
+.tt-hero-heading {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.tt-hero-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0.2rem 0 0 0;
+}
+
+.tt-hero-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Custom Select Dropdown */
+.tt-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tt-select-icon {
+  position: absolute;
+  left: 0.85rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: #6366f1;
+  pointer-events: none;
+}
+
+.tt-class-select {
+  padding: 0.55rem 1rem 0.55rem 2.4rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(99, 102, 241, 0.25);
+  background: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tt-class-select:focus, .tt-class-select:hover {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+}
+
+/* Gradient Buttons */
+.btn-gradient-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-gradient-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+}
+
+.btn-gradient-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 12px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-gradient-secondary:hover {
+  background: #c7d2fe;
+  transform: translateY(-1px);
+}
+
+.btn-gradient-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-gradient-danger:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* Empty States */
+.tt-empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px dashed rgba(99, 102, 241, 0.25);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+}
+
+.tt-empty-icon-ring {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1.25rem auto;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amber-ring { background: rgba(245,158,11,0.1); }
+.purple-ring { background: rgba(139,92,246,0.1); }
+
+.tt-empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.tt-empty-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0 auto 1.5rem auto;
+  line-height: 1.5;
+}
+
+.tt-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99,102,241,0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: ttSpin 0.8s linear infinite;
+}
+
+@keyframes ttSpin { to { transform: rotate(360deg); } }
+
+/* Timetable Board Card */
+.tt-board-card {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.tt-days-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-wrap: wrap;
+}
+
+.tt-days-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.tt-days-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tt-day-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(99,102,241,0.2);
+  color: #4338ca;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tt-slot-counter {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6366f1;
+  background: rgba(99,102,241,0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+}
+
+/* Timetable Grid Table */
+.tt-table-wrapper {
+  overflow-x: auto;
+}
+
+.tt-grid-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tt-grid-table th {
+  padding: 0.9rem 1rem;
+  background: #f1f5f9;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: center;
+}
+
+.tt-grid-table td {
+  padding: 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  vertical-align: top;
+}
+
+.tt-grid-table td:last-child { border-right: none; }
+
+.tt-period-badge {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  background: #475569;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tt-time-range {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-align: center;
+  display: block;
+}
+
+/* Slot Cards Inside Timetable Cells */
+.tt-slot-card {
+  padding: 0.65rem 0.8rem;
+  border-radius: 12px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.tt-slot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.tt-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.tt-slot-type-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 6px;
+}
+
+.tt-slot-subject {
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.25;
+}
+
+.tt-slot-teacher {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.73rem;
+  opacity: 0.85;
+}
+
+/* Slot Type Colors */
+.slot-lecture {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+}
+.slot-lecture .tt-slot-type-chip { background: #4338ca; color: #fff; }
+
+.slot-test {
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+}
+.slot-test .tt-slot-type-chip { background: #e11d48; color: #fff; }
+
+.slot-practical {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+.slot-practical .tt-slot-type-chip { background: #059669; color: #fff; }
+
+.slot-break {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+.slot-break .tt-slot-type-chip { background: #d97706; color: #fff; }
+
+.slot-free, .slot-empty {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Test Schedule Cards Grid */
+.ts-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.ts-card {
+  padding: 1.4rem;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ts-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.3);
+}
+
+.ts-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.ts-class-badge {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  background: #f1f5f9;
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+}
+
+.ts-type-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  background: #8b5cf6;
+  color: #ffffff;
+}
+
+.ts-type-pill.weekly { background: #3b82f6; }
+.ts-type-pill.monthly { background: #8b5cf6; }
+
+.ts-card-body {
+  margin-bottom: 1.25rem;
+}
+
+.ts-card-date {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.ts-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ts-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ts-card-footer {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+}
+
+.ts-btn-view {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border-radius: 10px;
+  background: #f3e8ff;
+  color: #7e22ce;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ts-btn-view:hover {
+  background: #e9d5ff;
+}
+
+/* ============================================================
+   ENHANCED GLOBAL UI COMPONENTS (TABLES, BUTTONS, INPUTS, PILLS)
+   ============================================================ */
+
+/* Data Table & Admin Table Styling */
+.admin-table, .data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-sans);
+}
+
+.admin-table th, .data-table th {
+  padding: 0.95rem 1.25rem;
+  background: #f8fafc;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--glass-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table td, .data-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr, .data-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-table tbody tr:hover, .data-table tbody tr:hover {
+  background: rgba(99, 102, 241, 0.03);
+}
+
+/* SaaS Small & Standard Action Buttons */
+.btn-primary-sm {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+  transition: all 0.2s ease;
+  line-height: 1.2;
+}
+
+.btn-primary-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+  filter: brightness(1.05);
+}
+
+.btn-secondary-sm {
+  background: #ffffff;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  line-height: 1.2;
+}
+
+.btn-secondary-sm:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Status Pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.status-pill.ongoing {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.status-pill.partial {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.status-pill.overdue {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Code & Identifier Chips */
+.code-chip {
+  background: #f1f5f9;
+  color: #475569;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Form Inputs inside Modals */
+.form-input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #6366f1;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+

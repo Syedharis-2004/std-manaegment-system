@@ -602,78 +602,269 @@
       </div>
     </div>
 
-    <!-- ===================== FEE PAGE ===================== -->
-    <div *ngIf="activePage() === 'fee'" class="page-section">
-      <div class="page-welcome">
-        <h1 class="page-title">Fee</h1>
-        <p class="page-subtitle">Fee collection and status overview</p>
-      </div>
-
-      <div class="metrics-grid">
-        <div class="glass-card metric-card">
-          <div class="metric-icon-wrapper green">
-            <svg lucideCheckCircle></svg>
-          </div>
-          <div class="metric-details">
-            <span class="metric-label">Fully Paid</span>
-            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Paid').length }}</h2>
-          </div>
+    <!-- ===================== FEE MANAGEMENT PAGE ===================== -->
+    <div *ngIf="activePage() === 'fee'" class="page-section fade-in">
+      <div class="page-header-row" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h2 class="page-title" style="font-size:1.5rem;font-weight:700;">Fee Management</h2>
+          <p class="page-subtitle">Generate fee vouchers and confirm student payments</p>
         </div>
-        <div class="glass-card metric-card">
-          <div class="metric-icon-wrapper orange">
-            <svg lucideCreditCard></svg>
-          </div>
-          <div class="metric-details">
-            <span class="metric-label">Pending</span>
-            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Pending').length }}</h2>
-          </div>
-        </div>
-        <div class="glass-card metric-card">
-          <div class="metric-icon-wrapper red">
-            <svg lucideXCircle></svg>
-          </div>
-          <div class="metric-details">
-            <span class="metric-label">Overdue</span>
-            <h2 class="metric-value">{{ feeRecords().filter(f => f.status === 'Overdue').length }}</h2>
-          </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button class="btn-primary-sm" (click)="openGenerateVoucherModal()">
+            <svg lucidePlus style="width:1rem;height:1rem;"></svg>
+            Generate Voucher
+          </button>
+          <button class="btn-secondary-sm" (click)="openConfirmPaymentModal()">
+            <svg lucideCheckCircle style="width:1rem;height:1rem;"></svg>
+            Confirm Payment
+          </button>
         </div>
       </div>
 
-      <div class="glass-card full-width-card" style="margin-top:2rem;">
-        <div class="card-title-bar">
-          <h3>Fee Records</h3>
-          <span class="badge blue">Spring 2026</span>
+      <div class="glass-card" style="overflow-x:auto;margin-top:1.25rem;">
+        <div *ngIf="allVouchers().length === 0" style="padding:3rem;text-align:center;color:var(--text-muted);">
+          <svg lucideCreditCard style="width:2.5rem;height:2.5rem;margin-bottom:0.75rem;opacity:0.4;"></svg>
+          <p style="font-size:0.95rem;font-weight:500;">No fee vouchers generated yet.</p>
         </div>
-        <div class="table-container">
-          <table class="admin-table">
+        <table *ngIf="allVouchers().length > 0" class="data-table">
+          <thead>
+            <tr>
+              <th>Voucher #</th>
+              <th>GR Number</th>
+              <th>Student Name</th>
+              <th>Class</th>
+              <th>Period</th>
+              <th>Amount (PKR)</th>
+              <th>Status</th>
+              <th>Generated Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of allVouchers()">
+              <td><span class="code-chip">{{ v.voucher_number || '—' }}</span></td>
+              <td><strong>{{ v.gr_number || '—' }}</strong></td>
+              <td>{{ v.student_name || '—' }}</td>
+              <td>{{ v.class_name || '—' }} <span *ngIf="v.section_name">({{ v.section_name }})</span></td>
+              <td>{{ v.month }} {{ v.year }}</td>
+              <td><strong style="color:var(--text-primary);">PKR {{ (v.amount || 0) | number }}</strong></td>
+              <td>
+                <span class="status-pill"
+                  [class.ongoing]="v.status === 'PAID'"
+                  [class.overdue]="v.status === 'UNPAID'">
+                  {{ v.status || 'UNPAID' }}
+                </span>
+              </td>
+              <td>{{ v.generated_at ? (v.generated_at | date:'MMM d, y') : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ===================== TIMETABLE MANAGER PAGE ===================== -->
+    <div *ngIf="activePage() === 'timetable'" class="page-section fade-in">
+      
+      <!-- Top Hero Header Bar -->
+      <div class="glass-card tt-hero-header">
+        <div class="tt-hero-title-group">
+          <div class="tt-hero-icon">
+            <svg lucideCalendar style="width:1.6rem;height:1.6rem;color:#6366f1;"></svg>
+          </div>
+          <div>
+            <h2 class="tt-hero-heading">Class Timetable Manager</h2>
+            <p class="tt-hero-sub">Design weekly schedules, allocate lectures & configure test periods</p>
+          </div>
+        </div>
+        
+        <div class="tt-hero-controls">
+          <div class="tt-select-wrapper">
+            <svg lucideSchool class="tt-select-icon"></svg>
+            <select #classSelect class="tt-class-select" (change)="loadTimetable(classSelect.value)">
+              <option value="">— Select Class —</option>
+              <option *ngFor="let cls of classes()" [value]="cls.id">{{ cls.program }} {{ cls.semester }}</option>
+            </select>
+          </div>
+
+          <button *ngIf="timetableSelectedClassId()" class="btn-gradient-primary" (click)="createQuickTimetable()">
+            <svg lucidePlus style="width:1rem;height:1rem;"></svg>
+            {{ timetableData() ? 'Reset Timetable' : 'Quick Create' }}
+          </button>
+          <button *ngIf="timetableData()" class="btn-gradient-secondary" (click)="openCopyTimetableModal()">
+            Copy
+          </button>
+          <button *ngIf="timetableData()" class="btn-gradient-danger" (click)="deleteTimetable()">
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- State 1: No Class Selected -->
+      <div *ngIf="!timetableSelectedClassId()" class="glass-card tt-empty-state">
+        <div class="tt-empty-icon-ring">
+          <svg lucideCalendar style="width:2.2rem;height:2.2rem;color:#6366f1;"></svg>
+        </div>
+        <h3 class="tt-empty-title">Select a Class to View Schedule</h3>
+        <p class="tt-empty-desc">Choose a class section from the dropdown above to view, design, or duplicate its weekly timetable.</p>
+      </div>
+
+      <!-- State 2: Loading -->
+      <div *ngIf="timetableLoading()" class="glass-card tt-empty-state">
+        <div class="tt-spinner"></div>
+        <p style="margin-top:1rem;font-weight:500;color:var(--text-muted);">Fetching timetable grid...</p>
+      </div>
+
+      <!-- State 3: Class Selected but No Timetable Configured -->
+      <div *ngIf="timetableSelectedClassId() && !timetableLoading() && !timetableData()" class="glass-card tt-empty-state">
+        <div class="tt-empty-icon-ring amber-ring">
+          <svg lucideClock style="width:2.2rem;height:2.2rem;color:#f59e0b;"></svg>
+        </div>
+        <h3 class="tt-empty-title">No Timetable Configured Yet</h3>
+        <p class="tt-empty-desc">This class section does not have an active timetable schedule. Generate a standard 5-day schedule containing lectures and test slots with a single click.</p>
+        <button class="btn-gradient-primary" (click)="createQuickTimetable()">
+          <svg lucidePlus style="width:1.1rem;height:1.1rem;"></svg>
+          Generate Standard Timetable
+        </button>
+      </div>
+
+      <!-- State 4: Timetable Grid Display -->
+      <div *ngIf="timetableData()" class="glass-card tt-board-card">
+        
+        <!-- Days Header Pills Bar -->
+        <div class="tt-days-bar">
+          <span class="tt-days-label">Active Days:</span>
+          <div class="tt-days-pills">
+            <span *ngFor="let day of timetableData()?.working_days" class="tt-day-chip">
+              {{ day }}
+            </span>
+          </div>
+          <span class="tt-slot-counter">
+            {{ timetableData()?.periods?.length || 0 }} Periods / Day
+          </span>
+        </div>
+
+        <!-- Timetable Grid Table -->
+        <div class="tt-table-wrapper">
+          <table class="tt-grid-table">
             <thead>
-              <tr><th>ID</th><th>Student</th><th>Class</th><th>Total</th><th>Paid</th><th>Due</th><th>Status</th><th>Due Date</th></tr>
+              <tr>
+                <th style="width:100px;">Period</th>
+                <th style="width:140px;">Time Slot</th>
+                <th *ngFor="let day of timetableData()?.working_days">{{ day }}</th>
+              </tr>
             </thead>
             <tbody>
-              @for (f of feeRecords(); track f.id) {
-                <tr>
-                  <td><span class="code-chip">{{ f.id }}</span></td>
-                  <td>{{ f.name }}</td>
-                  <td><span class="code-chip">{{ f.class }}</span></td>
-                  <td>PKR {{ f.amount | number }}</td>
-                  <td class="fee-paid-cell">PKR {{ f.paid | number }}</td>
-                  <td class="fee-due-cell">PKR {{ f.due | number }}</td>
-                  <td>
-                    <span class="status-pill"
-                      [class.ongoing]="f.status === 'Paid'"
-                      [class.partial]="f.status === 'Pending'"
-                      [class.overdue]="f.status === 'Overdue'">
-                      {{ f.status }}
-                    </span>
-                  </td>
-                  <td>{{ f.dueDate }}</td>
-                </tr>
-              }
+              <tr *ngFor="let period of timetableData()?.periods">
+                <td>
+                  <span class="tt-period-badge">P{{ period.period_no }}</span>
+                </td>
+                <td>
+                  <span class="tt-time-range">{{ period.start_time }} – {{ period.end_time }}</span>
+                </td>
+                <td *ngFor="let day of timetableData()?.working_days" class="tt-slot-td">
+                  
+                  <ng-container *ngIf="getTimetableSlot(day, period.period_no) as slot; else emptySlotCard">
+                    <div class="tt-slot-card" [ngClass]="getSlotClass(slot)" (click)="openEditSlotModal(slot, day, period.period_no)" style="cursor:pointer;" title="Click to edit slot">
+                      <div class="tt-slot-header">
+                        <span class="tt-slot-type-chip">{{ slot.slot_type }}</span>
+                        <span class="tt-edit-hint">✏️</span>
+                      </div>
+                      <h4 class="tt-slot-subject">{{ slot.subject || '—' }}</h4>
+                      <div class="tt-slot-teacher" *ngIf="slot.teacher_name">
+                        <svg lucideUser style="width:0.75rem;height:0.75rem;"></svg>
+                        <span>{{ slot.teacher_name }}</span>
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <ng-template #emptySlotCard>
+                    <div class="tt-slot-card slot-empty" (click)="openEditSlotModal(null, day, period.period_no)" style="cursor:pointer;" title="Click to configure slot">
+                      <span style="opacity:0.6;font-size:0.75rem;font-weight:600;">+ Configure</span>
+                    </div>
+                  </ng-template>
+
+                </td>
+
+              </tr>
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
+
+    <!-- ===================== TEST SCHEDULES PAGE ===================== -->
+    <div *ngIf="activePage() === 'test-schedules'" class="page-section fade-in">
+      
+      <!-- Top Hero Header Bar -->
+      <div class="glass-card tt-hero-header">
+        <div class="tt-hero-title-group">
+          <div class="tt-hero-icon purple-hero-icon">
+            <svg lucideClipboardList style="width:1.6rem;height:1.6rem;color:#8b5cf6;"></svg>
+          </div>
+          <div>
+            <h2 class="tt-hero-heading">Test Schedules & Assessments</h2>
+            <p class="tt-hero-sub">Generate monthly test schedules from class timetables and manage results</p>
+          </div>
+        </div>
+        
+        <button class="btn-gradient-primary" (click)="openGenerateScheduleModal()">
+          <svg lucidePlus style="width:1rem;height:1rem;"></svg>
+          Generate Schedule
+        </button>
+      </div>
+
+      <!-- State 1: No Schedules Found -->
+      <div *ngIf="testSchedules().length === 0" class="glass-card tt-empty-state">
+        <div class="tt-empty-icon-ring purple-ring">
+          <svg lucideClipboardList style="width:2.2rem;height:2.2rem;color:#8b5cf6;"></svg>
+        </div>
+        <h3 class="tt-empty-title">No Test Schedules Found</h3>
+        <p class="tt-empty-desc">Create a monthly test schedule for any class section that has an active timetable with test periods.</p>
+        <button class="btn-gradient-primary" (click)="openGenerateScheduleModal()">
+          <svg lucidePlus style="width:1.1rem;height:1.1rem;"></svg>
+          Generate Test Schedule
+        </button>
+      </div>
+
+      <!-- State 2: Grid of Test Schedule Cards -->
+      <div class="ts-cards-grid" *ngIf="testSchedules().length > 0">
+        <div *ngFor="let sch of testSchedules()" class="glass-card ts-card">
+          
+          <div class="ts-card-top">
+            <span class="ts-class-badge">{{ sch.class_name }} {{ sch.section_name }}</span>
+            <span class="ts-type-pill" [class.weekly]="sch.test_type === 'Weekly'" [class.monthly]="sch.test_type === 'Monthly'">
+              {{ sch.test_type }}
+            </span>
+          </div>
+
+          <div class="ts-card-body">
+            <h3 class="ts-card-date">{{ sch.month }} {{ sch.year }}</h3>
+            <div class="ts-card-meta">
+              <div class="ts-meta-item">
+                <svg lucideClock style="width:0.85rem;height:0.85rem;"></svg>
+                <span>Status: <strong>{{ sch.status }}</strong></span>
+              </div>
+              <div class="ts-meta-item">
+                <svg lucideCalendar style="width:0.85rem;height:0.85rem;"></svg>
+                <span>Created: {{ sch.created_at ? (sch.created_at | date:'MMM d, y') : '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ts-card-footer">
+            <button class="ts-btn-view" (click)="openScheduleDetail(sch)">
+              <svg lucideEye style="width:0.95rem;height:0.95rem;"></svg>
+              View & Edit Tests
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+
 
     <!-- ===================== UPLOAD DATA PAGE ===================== -->
     <div *ngIf="activePage() === 'upload'" class="page-section">
@@ -994,7 +1185,119 @@
         <div class="adm-detail-item"><span class="adm-detail-key">Class</span><span class="adm-detail-val">{{ selectedStudent()?.class_name }}-{{ selectedStudent()?.section }}</span></div>
         <div class="adm-detail-item"><span class="adm-detail-key">Department</span><span class="adm-detail-val">{{ selectedStudent()?.department || '—' }}</span></div>
         <div class="adm-detail-item"><span class="adm-detail-key">Mobile</span><span class="adm-detail-val">{{ selectedStudent()?.mobile_number || '—' }}</span></div>
-        <div class="adm-detail-item"><span class="adm-detail-key">Status</span><span class="adm-detail-val">{{ selectedStudent()?.student_status || '—' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- ========== COPY TIMETABLE MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showCopyTimetableModal()" (click)="closeCopyTimetableModal()">
+    <div class="modal-content glass-card" style="max-width:420px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Copy Timetable</h2>
+        <button class="btn-close" (click)="closeCopyTimetableModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-group">
+          <label>Destination Class</label>
+          <select class="form-input" [(ngModel)]="copyTimetableForm.destination_class_id">
+            <option value="">— Select Class —</option>
+            <option *ngFor="let cls of classes()" [value]="cls.id">{{ cls.program }} {{ cls.semester }}</option>
+          </select>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;">
+          <input type="checkbox" id="overwrite-chk" [(ngModel)]="copyTimetableForm.overwrite">
+          <label for="overwrite-chk">Overwrite if exists</label>
+        </div>
+        <button class="btn-primary-sm" style="width:100%;justify-content:center;" (click)="submitCopyTimetable()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GENERATE SCHEDULE MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showGenerateScheduleModal()" (click)="closeGenerateScheduleModal()">
+    <div class="modal-content glass-card" style="max-width:440px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Generate Test Schedule</h2>
+        <button class="btn-close" (click)="closeGenerateScheduleModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-group">
+          <label>Class</label>
+          <select class="form-input" [(ngModel)]="generateScheduleForm.class_id">
+            <option value="">— Select Class —</option>
+            <option *ngFor="let cls of classes()" [value]="cls.id">{{ cls.program }} {{ cls.semester }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Month</label>
+          <select class="form-input" [(ngModel)]="generateScheduleForm.month">
+            <option *ngFor="let m of ['January','February','March','April','May','June','July','August','September','October','November','December']" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input class="form-input" type="number" [(ngModel)]="generateScheduleForm.year">
+        </div>
+        <div class="form-group">
+          <label>Test Type</label>
+          <select class="form-input" [(ngModel)]="generateScheduleForm.test_type">
+            <option>Weekly</option>
+            <option>Monthly</option>
+            <option>Mid Term</option>
+            <option>Final Term</option>
+          </select>
+        </div>
+        <button class="btn-primary-sm" style="width:100%;justify-content:center;" (click)="submitGenerateSchedule()">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SCHEDULE DETAIL MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showScheduleDetail()" (click)="closeScheduleDetail()">
+    <div class="modal-content glass-card" style="max-width:750px;max-height:80vh;overflow-y:auto;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Schedule Detail — {{ selectedSchedule()?.class_name }} {{ selectedSchedule()?.section_name }} / {{ selectedSchedule()?.month }} {{ selectedSchedule()?.year }}</h2>
+        <button class="btn-close" (click)="closeScheduleDetail()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedSchedule()">
+        <div style="overflow-x:auto;">
+          <table class="data-table" *ngIf="selectedSchedule()?.tests?.length > 0">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Period</th>
+                <th>Date</th>
+                <th>Subject</th>
+                <th>Topic</th>
+                <th>Teacher</th>
+                <th>Total Marks</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let test of selectedSchedule()?.tests">
+                <td>{{ test.day }}</td>
+                <td>{{ test.period_no }}</td>
+                <td>{{ test.date || '—' }}</td>
+                <td><strong>{{ test.subject || '—' }}</strong></td>
+                <td>{{ test.topic || '—' }}</td>
+                <td>{{ test.teacher_name || '—' }}</td>
+                <td><span class="badge blue">{{ test.total_marks }}</span></td>
+                <td>
+                  <span class="status-pill" [class.ongoing]="test.status === 'ACTIVE'" [class.overdue]="test.status !== 'ACTIVE'">
+                    {{ test.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div *ngIf="!selectedSchedule()?.tests?.length" style="padding:1.5rem;text-align:center;color:var(--text-muted);">
+            No tests in this schedule yet.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1038,4 +1341,131 @@
     </div>
   </div>
 
+  <!-- ========== EDIT TIMETABLE SLOT MODAL (PUT /classes/{class_id}/timetable/slot) ========== -->
+
+  <div class="modal-overlay" *ngIf="showEditSlotModal()" (click)="closeEditSlotModal()">
+    <div class="modal-content glass-card" style="max-width:480px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Slot — {{ editSlotForm.day }} (Period {{ editSlotForm.period_no }})</h2>
+        <button class="btn-close" (click)="closeEditSlotModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        
+        <div class="form-group">
+          <label>Slot Type *</label>
+          <select class="form-input" [(ngModel)]="editSlotForm.slot_type" (change)="onSlotTypeChange()">
+            <option value="Lecture">Lecture</option>
+            <option value="Test">Test</option>
+            <option value="Practical">Practical</option>
+            <option value="Break">Break</option>
+            <option value="Free Period">Free Period</option>
+          </select>
+        </div>
+
+        <ng-container *ngIf="['Lecture', 'Test', 'Practical'].includes(editSlotForm.slot_type)">
+          <div class="form-group">
+            <label>Subject Name *</label>
+            <input class="form-input" [(ngModel)]="editSlotForm.subject" placeholder="e.g. Mathematics, Physics">
+          </div>
+
+          <div class="form-group">
+            <label>Teacher Name *</label>
+            <input class="form-input" [(ngModel)]="editSlotForm.teacher_name" placeholder="Teacher Full Name">
+          </div>
+
+          <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div>
+              <label>Teacher Status</label>
+              <select class="form-input" [(ngModel)]="editSlotForm.teacher_status">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+                <option value="ON_LEAVE">On Leave</option>
+              </select>
+            </div>
+            <div>
+              <label>Class Status</label>
+              <select class="form-input" [(ngModel)]="editSlotForm.class_status">
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </ng-container>
+
+        <button class="btn-gradient-primary" style="width:100%;justify-content:center;margin-top:0.5rem;" (click)="submitUpdateSlot()">
+          Save Slot Changes
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GENERATE VOUCHER MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showGenerateVoucherModal()" (click)="closeGenerateVoucherModal()">
+    <div class="modal-content glass-card" style="max-width:440px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Generate Fee Voucher</h2>
+        <button class="btn-close" (click)="closeGenerateVoucherModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-group">
+          <label>Student GR Number *</label>
+          <input class="form-input" [(ngModel)]="newVoucher.gr_number" placeholder="e.g. 26XI-001">
+        </div>
+        <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div>
+            <label>Month *</label>
+            <select class="form-input" [(ngModel)]="newVoucher.month">
+              <option value="January">January</option>
+              <option value="February">February</option>
+              <option value="March">March</option>
+              <option value="April">April</option>
+              <option value="May">May</option>
+              <option value="June">June</option>
+              <option value="July">July</option>
+              <option value="August">August</option>
+              <option value="September">September</option>
+              <option value="October">October</option>
+              <option value="November">November</option>
+              <option value="December">December</option>
+            </select>
+          </div>
+          <div>
+            <label>Year *</label>
+            <input type="number" class="form-input" [(ngModel)]="newVoucher.year" placeholder="2026">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Amount (PKR) *</label>
+          <input type="number" class="form-input" [(ngModel)]="newVoucher.amount" placeholder="e.g. 5000">
+        </div>
+        <button class="btn-gradient-primary" style="width:100%;justify-content:center;margin-top:0.5rem;" (click)="submitGenerateVoucher()">
+          Generate Fee Voucher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CONFIRM PAYMENT MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showConfirmPaymentModal()" (click)="closeConfirmPaymentModal()">
+    <div class="modal-content glass-card" style="max-width:420px;" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirm Fee Payment</h2>
+        <button class="btn-close" (click)="closeConfirmPaymentModal()"><svg lucideXCircle></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-group">
+          <label>Student GR Number *</label>
+          <input class="form-input" [(ngModel)]="confirmPayment.gr_number" placeholder="e.g. 26XI-001">
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-muted);">Confirms payment for the latest unpaid voucher associated with this GR Number.</p>
+        <button class="btn-gradient-primary" style="width:100%;justify-content:center;margin-top:0.5rem;" (click)="submitConfirmPayment()">
+          Confirm Payment Received
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+

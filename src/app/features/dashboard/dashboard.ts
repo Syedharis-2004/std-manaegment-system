@@ -20,7 +20,9 @@ import {
   LucideChevronDown,
   LucideChevronRight,
   LucideUserCog,
-  LucideUpload
+  LucideUpload,
+  LucideCalendar,
+  LucideAward
 } from '@lucide/angular';
 
 @Component({
@@ -44,7 +46,9 @@ import {
     LucideChevronDown,
     LucideChevronRight,
     LucideUserCog,
-    LucideUpload
+    LucideUpload,
+    LucideCalendar,
+    LucideAward
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'

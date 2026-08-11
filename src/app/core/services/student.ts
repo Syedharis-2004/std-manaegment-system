@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StudentService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
+  private apiUrl = environment.apiUrl;
 
   getStudents(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/students/`);

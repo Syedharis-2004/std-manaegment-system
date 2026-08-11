@@ -4,6 +4,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { StudentService } from '../../../core/services/student';
+import { StudentClassService } from '../../../core/services/student-class';
+import { StudentFeeService } from '../../../core/services/student-fee';
+import { StudentNoticeService } from '../../../core/services/student-notice';
+import { StudentTeacherService } from '../../../core/services/student-teacher';
+import { StudentAssignmentService } from '../../../core/services/student-assignment';
+import { environment } from '@env/environment';
 
 import {
   LucideCheckCircle,
@@ -44,8 +50,13 @@ export class StudentDashboard implements OnInit {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private studentService = inject(StudentService);
+  private studentClassService = inject(StudentClassService);
+  private studentFeeService = inject(StudentFeeService);
+  private studentNoticeService = inject(StudentNoticeService);
+  private studentTeacherService = inject(StudentTeacherService);
+  private studentAssignmentService = inject(StudentAssignmentService);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = environment.apiUrl;
 
   // Active page passed from parent dashboard (two-way binding model)
   activePage = model<string>('dashboard');
@@ -121,57 +132,38 @@ export class StudentDashboard implements OnInit {
   ]);
 
   // Fee History
-  feeHistory = signal([
-    { id: 'INV-2026-04', semester: 'Spring 2026', amount: 45000, paid: 45000, date: 'Jan 15, 2026', status: 'Paid', method: 'Bank Transfer' },
-    { id: 'INV-2025-08', semester: 'Fall 2025', amount: 45000, paid: 45000, date: 'Aug 10, 2025', status: 'Paid', method: 'Online Portal' },
-    { id: 'INV-2025-02', semester: 'Spring 2025', amount: 42000, paid: 42000, date: 'Jan 12, 2025', status: 'Paid', method: 'Bank Transfer' },
-    { id: 'INV-2024-08', semester: 'Fall 2024', amount: 42000, paid: 30000, date: 'Aug 08, 2024', status: 'Partial', method: 'Online Portal' },
-    { id: 'INV-2024-02', semester: 'Spring 2024', amount: 38000, paid: 38000, date: 'Jan 11, 2024', status: 'Paid', method: 'Bank Transfer' }
-  ]);
+  feeHistory = signal<any[]>([]);
 
   // Notices
-  notices = signal([
-    {
-      id: 1,
-      title: 'Mid-Semester Examination Schedule Released',
-      category: 'Exam',
-      date: 'July 14, 2026',
-      priority: 'high',
-      body: 'The mid-semester examination schedule for Spring 2026 has been officially released. All students are required to check their subject-wise slots on the student portal. Exams will commence from July 28, 2026.'
-    },
-    {
-      id: 2,
-      title: 'Library Hours Extended During Exam Period',
-      category: 'Facility',
-      date: 'July 13, 2026',
-      priority: 'normal',
-      body: 'The university library will remain open until 11:00 PM from July 20 to August 10, 2026 to support students during the examination period. Study rooms can be booked via the library portal.'
-    },
-    {
-      id: 3,
-      title: 'Fee Submission Deadline — Spring 2026',
-      category: 'Finance',
-      date: 'July 10, 2026',
-      priority: 'high',
-      body: 'Last date for semester fee submission is July 20, 2026. Students who fail to pay by the deadline will incur a late fine of PKR 500/day. Contact the accounts office for payment plans.'
-    },
-    {
-      id: 4,
-      title: 'Guest Lecture: AI in Healthcare — Dr. Fei-Fei Li',
-      category: 'Event',
-      date: 'July 8, 2026',
-      priority: 'normal',
-      body: 'A guest lecture titled "AI in Modern Healthcare" will be held on July 22, 2026 in Auditorium Hall A. All CS and related department students are encouraged to attend. Registration opens tomorrow.'
-    },
-    {
-      id: 5,
-      title: 'Campus Maintenance — Water Supply Shutdown',
-      category: 'Facility',
-      date: 'July 6, 2026',
-      priority: 'low',
-      body: 'Due to scheduled maintenance, water supply will be temporarily unavailable on July 17, 2026 from 9:00 AM to 1:00 PM in Blocks A and B. Plan accordingly and carry water bottles.'
-    }
-  ]);
+  notices = signal<any[]>([]);
+
+  // Upcoming Tests (from API)
+  upcomingTests = signal<any[]>([]);
+
+  // Test Results (from API)
+  testResults = signal<any[]>([]);
+
+  // Real timetable & today schedule signals
+  studentTimetable = signal<any>(null);
+  todaySchedule = signal<any[]>([]);
+  todayName = signal<string>('');
+
+  getStudentTimetableSlot(day: string, periodNo: number): any {
+    const schedule = this.studentTimetable()?.schedule || [];
+    return schedule.find((s: any) => s.day === day && s.period_no === periodNo) || null;
+  }
+
+  getSlotClass(slot: any): string {
+    if (!slot) return '';
+    const map: Record<string, string> = {
+      'Lecture': 'slot-lecture',
+      'Test': 'slot-test',
+      'Practical': 'slot-practical',
+      'Break': 'slot-break',
+      'Free Period': 'slot-free'
+    };
+    return map[slot.slot_type] || '';
+  }
 
   ngOnInit(): void {
     this.http.get<any>(`${this.apiUrl}/dashboard/student`).subscribe({
@@ -179,7 +171,7 @@ export class StudentDashboard implements OnInit {
         this.backendMessage.set(res.message || 'Access granted!');
         this.isAuthorized.set(true);
         this.isLoading.set(false);
-        this.checkAdmissionStatus();
+        this.loadStudentData();
       },
       error: (err) => {
         this.backendMessage.set(err.error?.detail || 'Unauthorized student access!');
@@ -189,13 +181,15 @@ export class StudentDashboard implements OnInit {
     });
   }
 
-  checkAdmissionStatus(): void {
+  loadStudentData(): void {
     this.authService.getMe().subscribe({
       next: (profile) => {
         if (profile?.admission_status === 'NOT_SUBMITTED') {
           this.showAdmissionModal.set(true);
-        } else if (profile?.admission_status === 'APPROVED') {
-          // Fetch actual class details
+          return;
+        }
+
+        if (profile?.admission_status === 'APPROVED') {
           this.studentService.getStudentDetails(profile.id).subscribe({
             next: (details) => {
               this.myClassInfo.set({
@@ -205,7 +199,81 @@ export class StudentDashboard implements OnInit {
                 gr_number: details.gr_number
               });
             },
-            error: () => console.error("Could not fetch real class details")
+            error: () => console.error('Could not fetch real class details')
+          });
+
+          this.studentClassService.getStudentClass().subscribe({
+            next: (data) => {
+              if (data) {
+                if (data.class_information) {
+                  this.myClassInfo.set({
+                    class_name: data.class_information.class_name,
+                    section: data.class_information.section_name,
+                    department: profile.department || '',
+                    gr_number: profile.gr_number || ''
+                  });
+                }
+                this.todayName.set(data.today || '');
+                this.todaySchedule.set(data.today_schedule || []);
+                this.studentTimetable.set(data.timetable || null);
+              }
+            },
+            error: (err) => console.error('Could not fetch student class data', err)
+          });
+
+          this.studentFeeService.getFeeHistory().subscribe({
+            next: (fees) => {
+              this.feeHistory.set(fees.map((fee: any, index: number) => ({
+                id: fee.voucher_number || `FEE-${index + 1}`,
+                semester: fee.semester || 'N/A',
+                amount: fee.amount || 0,
+                paid: fee.paid_amount || 0,
+                date: fee.paid_date || fee.created_at || 'N/A',
+                status: fee.status || 'UNPAID',
+                method: fee.payment_method || 'N/A'
+              })));
+            },
+            error: (err) => console.error('Could not fetch fee history', err)
+          });
+
+          this.studentNoticeService.getNotices().subscribe({
+            next: (notices) => {
+              this.notices.set(notices.map((notice: any) => ({
+                id: notice.notice_id || notice._id || '',
+                title: notice.title || notice.subject || 'Notice',
+                category: notice.category || notice.type || 'General',
+                date: notice.created_at || notice.date || 'N/A',
+                priority: notice.priority || 'normal',
+                body: notice.body || notice.description || ''
+              })));
+            },
+            error: (err) => console.error('Could not fetch notices', err)
+          });
+
+          this.studentTeacherService.getStudentTeachers().subscribe({
+            next: (teachers) => {
+              this.teachers.set(teachers.map((teacher: any) => ({
+                name: teacher.teacher_name || 'Unknown',
+                subject: teacher.subject || 'Unknown',
+                email: teacher.email || 'N/A',
+                status: teacher.teacher_status || 'Unknown',
+                office: teacher.office || 'N/A',
+                todayPresent: teacher.teacher_status?.toLowerCase() === 'active'
+              })));
+            },
+            error: (err) => console.error('Could not fetch student teachers', err)
+          });
+
+          // Load upcoming tests
+          this.studentAssignmentService.getUpcomingTests().subscribe({
+            next: (tests) => this.upcomingTests.set(tests),
+            error: (err) => console.error('Could not fetch upcoming tests', err)
+          });
+
+          // Load test results
+          this.studentAssignmentService.getResults().subscribe({
+            next: (results) => this.testResults.set(results),
+            error: (err) => console.error('Could not fetch test results', err)
           });
         }
       },

@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
+import { environment } from '@env/environment';
 
 export interface User {
   email?: string;
@@ -20,7 +21,7 @@ export interface User {
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
+  private apiUrl = environment.apiUrl;
   
   // Reactive state management using Angular Signals
   currentUser = signal<User | null>(null);
@@ -86,6 +87,10 @@ export class AuthService {
   }
 
   logout(): void {
+    // Call backend logout endpoint then clear local session
+    this.http.post<any>(`${this.apiUrl}/auth/logout`, {}).subscribe({
+      error: () => {} // Ignore errors — always clear local state
+    });
     localStorage.removeItem('edu_user');
     localStorage.removeItem('edu_token');
     this.currentUser.set(null);

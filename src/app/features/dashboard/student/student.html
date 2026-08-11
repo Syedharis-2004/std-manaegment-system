@@ -42,6 +42,150 @@
         </div>
       </div>
 
+      <!-- Today's Schedule Overview Card -->
+      <div class="glass-card full-width-card" style="margin-top:1.5rem;">
+        <div class="card-title-bar" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h3>Today's Schedule — <span style="color:var(--accent-secondary, #6366f1);">{{ todayName() || 'Today' }}</span></h3>
+            <p style="font-size:0.83rem;color:var(--text-muted);margin-top:0.2rem;" *ngIf="myClassInfo()">
+              Class {{ myClassInfo()?.class_name }}-{{ myClassInfo()?.section }}
+            </p>
+          </div>
+          <button class="btn-action-sm" (click)="activePage.set('timetable')">View Full Timetable</button>
+        </div>
+
+        <div *ngIf="todaySchedule().length === 0" style="padding:1.75rem;text-align:center;color:var(--text-muted);">
+          <svg lucideClock style="width:2rem;height:2rem;margin-bottom:0.5rem;opacity:0.4;"></svg>
+          <p style="font-size:0.9rem;">No classes scheduled for today.</p>
+        </div>
+
+        <div *ngIf="todaySchedule().length > 0" class="ts-cards-grid" style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));gap:0.85rem;">
+          <div *ngFor="let slot of todaySchedule()" class="tt-slot-card" [ngClass]="getSlotClass(slot)">
+            <div class="tt-slot-header">
+              <span class="tt-slot-type-chip">{{ slot.slot_type }}</span>
+              <span class="tt-time-range" style="font-size:0.75rem;">Period {{ slot.period_no }}</span>
+            </div>
+            <h4 class="tt-slot-subject">{{ slot.subject || '—' }}</h4>
+            <div class="tt-slot-teacher" *ngIf="slot.teacher_name">
+              <svg lucideUser style="width:0.75rem;height:0.75rem;"></svg>
+              <span>{{ slot.teacher_name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================
+         PAGE: CLASS TIMETABLE
+         ======================================== -->
+    <div *ngIf="activePage() === 'timetable'" class="page-section fade-in">
+
+      <!-- ── Today's Schedule Hero Strip ── -->
+      <div class="tt-today-hero glass-card">
+        <div class="tt-today-hero-left">
+          <div class="tt-today-badge">
+            <svg lucideCalendar style="width:0.9rem;height:0.9rem;"></svg>
+            <span>{{ todayName() || 'Today' }}</span>
+          </div>
+          <h3 class="tt-today-title">Today's Schedule</h3>
+          <p class="tt-today-sub" *ngIf="todaySchedule().length > 0">
+            {{ todaySchedule().length }} session{{ todaySchedule().length > 1 ? 's' : '' }} — stay focused!
+          </p>
+          <p class="tt-today-sub muted" *ngIf="todaySchedule().length === 0 && todayName()">
+            No classes today — enjoy your free time!
+          </p>
+          <p class="tt-today-sub muted" *ngIf="!todayName()">
+            Timetable loaded. Select today's column to see your schedule.
+          </p>
+        </div>
+
+        <div class="tt-today-slots" *ngIf="todaySchedule().length > 0">
+          <div *ngFor="let slot of todaySchedule()" class="tt-today-mini" [ngClass]="getSlotClass(slot)">
+            <span class="tt-slot-type-chip">{{ slot.slot_type }}</span>
+            <div class="tt-today-mini-subject">{{ slot.subject || '—' }}</div>
+            <div class="tt-today-mini-teacher" *ngIf="slot.teacher_name">
+              <svg lucideUser style="width:0.65rem;height:0.65rem;flex-shrink:0;"></svg>
+              <span>{{ slot.teacher_name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tt-today-empty" *ngIf="todaySchedule().length === 0">
+          <svg lucideClock style="width:2.5rem;height:2.5rem;opacity:0.2;"></svg>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="!studentTimetable() && isLoading()" class="glass-card" style="padding:2.5rem;text-align:center;color:var(--text-muted);">
+        <p>Loading your class timetable...</p>
+      </div>
+
+      <!-- No Timetable Available State -->
+      <div *ngIf="!studentTimetable() && !isLoading()" class="glass-card" style="padding:4rem;text-align:center;color:var(--text-muted);">
+        <div style="background:#f1f5f9;width:5rem;height:5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;border:2px dashed #cbd5e1;">
+          <svg lucideCalendar style="width:2.2rem;height:2.2rem;opacity:0.45;color:#6366f1;"></svg>
+        </div>
+        <h3 style="margin-bottom:0.5rem;color:var(--text-primary);">No Timetable Found</h3>
+        <p style="font-size:0.9rem;">Your academic timetable hasn't been configured by your administrator yet.</p>
+      </div>
+
+      <!-- Full Week Grid -->
+      <div *ngIf="studentTimetable()" class="glass-card detail-table-card" style="margin-top:1.25rem;">
+
+        <div class="tt-week-header">
+          <div class="tt-week-label">
+            <svg lucideCalendar style="width:1rem;height:1rem;color:#6366f1;"></svg>
+            <span>Full Week Grid</span>
+          </div>
+          <div class="tt-week-days-pills">
+            <span *ngFor="let day of studentTimetable()?.working_days"
+              class="tt-week-day-pill"
+              [class.tt-week-day-pill--active]="day === todayName()">
+              {{ day.slice(0, 3) }}
+              <span class="tt-today-dot" *ngIf="day === todayName()"></span>
+            </span>
+          </div>
+          <span class="badge purple">{{ studentTimetable()?.periods?.length || 0 }} periods/day</span>
+        </div>
+
+        <div class="tt-table-wrapper">
+          <table class="tt-grid-table">
+            <thead>
+              <tr>
+                <th style="width:80px;">Period</th>
+                <th style="width:130px;">Time</th>
+                <th *ngFor="let day of studentTimetable()?.working_days" [class.highlight-today-th]="day === todayName()">
+                  {{ day }}
+                  <span *ngIf="day === todayName()" class="today-tag">TODAY</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let period of studentTimetable()?.periods">
+                <td><span class="tt-period-badge">P{{ period.period_no }}</span></td>
+                <td><span class="tt-time-range">{{ period.start_time }} – {{ period.end_time }}</span></td>
+                <td *ngFor="let day of studentTimetable()?.working_days" class="tt-slot-td" [class.highlight-today-td]="day === todayName()">
+                  <ng-container *ngIf="getStudentTimetableSlot(day, period.period_no) as slot; else emptySlot">
+                    <div class="tt-slot-card" [ngClass]="getSlotClass(slot)">
+                      <div class="tt-slot-header"><span class="tt-slot-type-chip">{{ slot.slot_type }}</span></div>
+                      <h4 class="tt-slot-subject">{{ slot.subject || '—' }}</h4>
+                      <div class="tt-slot-teacher" *ngIf="slot.teacher_name">
+                        <svg lucideUser style="width:0.7rem;height:0.7rem;"></svg>
+                        <span>{{ slot.teacher_name }}</span>
+                      </div>
+                    </div>
+                  </ng-container>
+                  <ng-template #emptySlot>
+                    <div class="tt-slot-card slot-empty"><span style="opacity:0.35;font-size:0.75rem;">—</span></div>
+                  </ng-template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
     </div>
 
     <!-- ========================================
@@ -360,6 +504,112 @@
                     {{ log.status }}
                   </span>
                 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: UPCOMING TESTS
+         ======================================== -->
+    <div *ngIf="activePage() === 'upcoming-tests'" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideCalendar class="section-icon"></svg>
+          Upcoming Tests
+        </h2>
+      </div>
+
+      <div *ngIf="upcomingTests().length === 0" class="glass-card" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+        <svg lucideInfo style="width:2.5rem;height:2.5rem;margin-bottom:0.75rem;opacity:0.5"></svg>
+        <p>No upcoming tests scheduled yet.</p>
+      </div>
+
+      <div class="glass-card detail-table-card" *ngIf="upcomingTests().length > 0">
+        <div class="detail-table-wrapper">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Topic</th>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Period</th>
+                <th>Teacher</th>
+                <th>Total Marks</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let test of upcomingTests()" class="detail-row">
+                <td><strong>{{ test.subject || '—' }}</strong></td>
+                <td>{{ test.topic || '—' }}</td>
+                <td class="date-cell">{{ test.date || '—' }}</td>
+                <td>{{ test.day || '—' }}</td>
+                <td>{{ test.period_no || '—' }}</td>
+                <td>{{ test.teacher_name || '—' }}</td>
+                <td><span class="badge blue">{{ test.total_marks }}</span></td>
+                <td><span class="status-pill ongoing">{{ test.test_type || 'Test' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================
+         PAGE: MY RESULTS
+         ======================================== -->
+    <div *ngIf="activePage() === 'results'" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg lucideCheckSquare class="section-icon"></svg>
+          My Results
+        </h2>
+      </div>
+
+      <div *ngIf="testResults().length === 0" class="glass-card" style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+        <svg lucideInfo style="width:2.5rem;height:2.5rem;margin-bottom:0.75rem;opacity:0.5"></svg>
+        <p>No results available yet.</p>
+      </div>
+
+      <div class="glass-card detail-table-card" *ngIf="testResults().length > 0">
+        <div class="detail-table-wrapper">
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Topic</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Obtained</th>
+                <th>Total</th>
+                <th>%</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of testResults()" class="detail-row">
+                <td><strong>{{ r.subject || '—' }}</strong></td>
+                <td>{{ r.topic || '—' }}</td>
+                <td class="date-cell">{{ r.date || '—' }}</td>
+                <td>{{ r.test_type || '—' }}</td>
+                <td>
+                  <span class="metric-value" style="font-size:1.1rem;font-weight:700;">
+                    {{ r.obtained_marks ?? '—' }}
+                  </span>
+                </td>
+                <td>{{ r.total_marks }}</td>
+                <td>
+                  <span class="status-pill"
+                    [class.ongoing]="r.obtained_marks != null && (r.obtained_marks / r.total_marks) >= 0.5"
+                    [class.overdue]="r.obtained_marks != null && (r.obtained_marks / r.total_marks) < 0.5">
+                    {{ r.obtained_marks != null ? ((r.obtained_marks / r.total_marks) * 100 | number:'1.0-0') + '%' : '—' }}
+                  </span>
+                </td>
+                <td>{{ r.remarks || '—' }}</td>
               </tr>
             </tbody>
           </table>

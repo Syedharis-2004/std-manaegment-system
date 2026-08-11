@@ -37,6 +37,11 @@
             <span class="submenu-dot"></span>
             <span>Class Detail</span>
           </button>
+          <button class="menu-item submenu-item" [class.active]="studentActivePage() === 'timetable'"
+            (click)="navigateStudent('timetable')">
+            <span class="submenu-dot"></span>
+            <span>Class Timetable</span>
+          </button>
         </div>
 
         <!-- Fee History -->
@@ -58,6 +63,20 @@
           (click)="navigateStudent('assignments')">
           <svg lucideClipboardList class="menu-icon"></svg>
           <span>Assignments</span>
+        </button>
+
+        <!-- Upcoming Tests -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'upcoming-tests'"
+          (click)="navigateStudent('upcoming-tests')">
+          <svg lucideCalendar class="menu-icon"></svg>
+          <span>Upcoming Tests</span>
+        </button>
+
+        <!-- My Results -->
+        <button class="menu-item" [class.active]="studentActivePage() === 'results'"
+          (click)="navigateStudent('results')">
+          <svg lucideAward class="menu-icon"></svg>
+          <span>My Results</span>
         </button>
 
       </ng-container>
@@ -107,6 +126,14 @@
         <button class="menu-item" [class.active]="adminActivePage() === 'fee'" (click)="navigateAdmin('fee')">
           <svg lucideCreditCard class="menu-icon"></svg>
           <span>Fee</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'timetable'" (click)="navigateAdmin('timetable')">
+          <svg lucideCalendar class="menu-icon"></svg>
+          <span>Timetable</span>
+        </button>
+        <button class="menu-item" [class.active]="adminActivePage() === 'test-schedules'" (click)="navigateAdmin('test-schedules')">
+          <svg lucideClipboardList class="menu-icon"></svg>
+          <span>Test Schedules</span>
         </button>
         <button class="menu-item" [class.active]="adminActivePage() === 'upload'" (click)="navigateAdmin('upload')">
           <svg lucideUpload class="menu-icon"></svg>

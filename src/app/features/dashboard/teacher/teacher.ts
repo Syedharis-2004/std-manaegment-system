@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 import { LucideBookOpen, LucideEdit, LucideStar } from '@lucide/angular';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -12,7 +13,7 @@ import { LucideBookOpen, LucideEdit, LucideStar } from '@lucide/angular';
 })
 export class TeacherDashboard implements OnInit {
   private http = inject(HttpClient);
-  private apiUrl = 'https://education-system-backend-71m5.onrender.com';
+  private apiUrl = environment.apiUrl;
 
   backendMessage = signal<string>('Verifying teacher access...');
   isAuthorized = signal<boolean>(false);

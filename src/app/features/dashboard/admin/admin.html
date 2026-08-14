@@ -966,100 +966,121 @@
         <form (ngSubmit)="onCreateUserSubmit()" ngNativeValidate>
 
           <!-- ---- TEACHER FORM ---- -->
-          <div *ngIf="createUserRole() === 'teacher'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-            <div class="form-group">
-              <label>First Name *</label>
-              <input type="text" [(ngModel)]="newTeacher.first_name" name="t_first" required class="sa-search-input modal-input" placeholder="First name">
+          <div *ngIf="createUserRole() === 'teacher'" style="display:flex;flex-direction:column;gap:1rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" [(ngModel)]="newTeacher.first_name" name="t_first" (input)="generateTeacherCredentials()" required class="sa-search-input modal-input" placeholder="First name">
+              </div>
+              <div class="form-group">
+                <label>Middle Name</label>
+                <input type="text" [(ngModel)]="newTeacher.middle_name" name="t_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" [(ngModel)]="newTeacher.last_name" name="t_last" (input)="generateTeacherCredentials()" required class="sa-search-input modal-input" placeholder="Last name">
+              </div>
+              <div class="form-group">
+                <label>Father's Name *</label>
+                <input type="text" [(ngModel)]="newTeacher.father_name" name="t_father" required class="sa-search-input modal-input" placeholder="Father's name">
+              </div>
+              <div class="form-group">
+                <label>Mobile *</label>
+                <input type="text" [(ngModel)]="newTeacher.mobile_number" name="t_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+              </div>
+              <div class="form-group">
+                <label>CNIC *</label>
+                <input type="text" [(ngModel)]="newTeacher.cnic" name="t_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
+              </div>
+              <div class="form-group">
+                <label>Subject *</label>
+                <input type="text" [(ngModel)]="newTeacher.subject" name="t_subject" required class="sa-search-input modal-input" placeholder="e.g. Mathematics">
+              </div>
+              <div class="form-group">
+                <label>Qualification *</label>
+                <input type="text" [(ngModel)]="newTeacher.qualification" name="t_qual" required class="sa-search-input modal-input" placeholder="e.g. Masters">
+              </div>
+              <div class="form-group">
+                <label>Experience *</label>
+                <input type="text" [(ngModel)]="newTeacher.experience" name="t_exp" required class="sa-search-input modal-input" placeholder="e.g. 3 Years">
+              </div>
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Address *</label>
+                <input type="text" [(ngModel)]="newTeacher.address" name="t_addr" required class="sa-search-input modal-input" placeholder="Full address">
+              </div>
             </div>
-            <div class="form-group">
-              <label>Middle Name</label>
-              <input type="text" [(ngModel)]="newTeacher.middle_name" name="t_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+
+            <!-- Auto-Generated Credentials -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;margin-top:0.3rem;display:flex;align-items:center;justify-content:space-between;">
+              <span>Teacher Login Credentials (Auto-Generated)</span>
+              <button type="button" (click)="generateTeacherCredentials()" style="background:none;border:none;color:var(--accent-secondary);font-size:0.75rem;font-weight:600;cursor:pointer;">⚡ Regenerate</button>
             </div>
-            <div class="form-group">
-              <label>Last Name *</label>
-              <input type="text" [(ngModel)]="newTeacher.last_name" name="t_last" required class="sa-search-input modal-input" placeholder="Last name">
-            </div>
-            <div class="form-group">
-              <label>Father's Name *</label>
-              <input type="text" [(ngModel)]="newTeacher.father_name" name="t_father" required class="sa-search-input modal-input" placeholder="Father's name">
-            </div>
-            <div class="form-group">
-              <label>Mobile *</label>
-              <input type="text" [(ngModel)]="newTeacher.mobile_number" name="t_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
-            </div>
-            <div class="form-group">
-              <label>Email *</label>
-              <input type="email" [(ngModel)]="newTeacher.email" name="t_email" required class="sa-search-input modal-input" placeholder="Email address">
-            </div>
-            <div class="form-group">
-              <label>Password *</label>
-              <input type="password" [(ngModel)]="newTeacher.password" name="t_pass" required class="sa-search-input modal-input" placeholder="Password">
-            </div>
-            <div class="form-group">
-              <label>Confirm Password *</label>
-              <input type="password" [(ngModel)]="newTeacher.confirm_password" name="t_cpass" required class="sa-search-input modal-input" placeholder="Confirm password">
-            </div>
-            <div class="form-group">
-              <label>CNIC *</label>
-              <input type="text" [(ngModel)]="newTeacher.cnic" name="t_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
-            </div>
-            <div class="form-group">
-              <label>Subject *</label>
-              <input type="text" [(ngModel)]="newTeacher.subject" name="t_subject" required class="sa-search-input modal-input" placeholder="e.g. Mathematics">
-            </div>
-            <div class="form-group">
-              <label>Qualification *</label>
-              <input type="text" [(ngModel)]="newTeacher.qualification" name="t_qual" required class="sa-search-input modal-input" placeholder="e.g. Masters">
-            </div>
-            <div class="form-group">
-              <label>Experience *</label>
-              <input type="text" [(ngModel)]="newTeacher.experience" name="t_exp" required class="sa-search-input modal-input" placeholder="e.g. 3 Years">
-            </div>
-            <div class="form-group" style="grid-column:1/-1;">
-              <label>Address *</label>
-              <input type="text" [(ngModel)]="newTeacher.address" name="t_addr" required class="sa-search-input modal-input" placeholder="Full address">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;background:rgba(47,128,237,0.04);padding:0.9rem;border-radius:10px;border:1px dashed var(--glass-border);">
+              <div class="form-group">
+                <label>Login Email / Username *</label>
+                <input type="email" [(ngModel)]="newTeacher.email" name="t_email" required class="sa-search-input modal-input" placeholder="Email address">
+              </div>
+              <div class="form-group">
+                <label>Auto-Generated Password *</label>
+                <input type="text" [(ngModel)]="newTeacher.password" (input)="newTeacher.confirm_password = newTeacher.password" name="t_pass" required class="sa-search-input modal-input" style="font-weight:700;letter-spacing:0.05em;color:var(--accent-primary);" placeholder="Password">
+              </div>
             </div>
           </div>
 
           <!-- ---- STAFF FORM ---- -->
-          <div *ngIf="createUserRole() === 'staff'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-            <div class="form-group">
-              <label>First Name *</label>
-              <input type="text" [(ngModel)]="newStaff.first_name" name="s_first" required class="sa-search-input modal-input" placeholder="First name">
+          <div *ngIf="createUserRole() === 'staff'" style="display:flex;flex-direction:column;gap:1rem;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" [(ngModel)]="newStaff.first_name" name="s_first" (input)="generateStaffCredentials()" required class="sa-search-input modal-input" placeholder="First name">
+              </div>
+              <div class="form-group">
+                <label>Middle Name</label>
+                <input type="text" [(ngModel)]="newStaff.middle_name" name="s_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" [(ngModel)]="newStaff.last_name" name="s_last" (input)="generateStaffCredentials()" required class="sa-search-input modal-input" placeholder="Last name">
+              </div>
+              <div class="form-group">
+                <label>Father's Name *</label>
+                <input type="text" [(ngModel)]="newStaff.father_name" name="s_father" required class="sa-search-input modal-input" placeholder="Father's name">
+              </div>
+              <div class="form-group">
+                <label>Mobile *</label>
+                <input type="text" [(ngModel)]="newStaff.mobile_number" name="s_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+              </div>
+              <div class="form-group">
+                <label>CNIC *</label>
+                <input type="text" [(ngModel)]="newStaff.cnic" name="s_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
+              </div>
+              <div class="form-group">
+                <label>Designation *</label>
+                <input type="text" [(ngModel)]="newStaff.designation" name="s_designation" required class="sa-search-input modal-input" placeholder="e.g. Librarian">
+              </div>
+              <div class="form-group" style="grid-column:1/-1;">
+                <label>Address *</label>
+                <input type="text" [(ngModel)]="newStaff.address" name="s_addr" required class="sa-search-input modal-input" placeholder="Full address">
+              </div>
             </div>
-            <div class="form-group">
-              <label>Middle Name</label>
-              <input type="text" [(ngModel)]="newStaff.middle_name" name="s_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+
+            <!-- Auto-Generated Credentials -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;margin-top:0.3rem;display:flex;align-items:center;justify-content:space-between;">
+              <span>Staff Login Credentials (Auto-Generated)</span>
+              <button type="button" (click)="generateStaffCredentials()" style="background:none;border:none;color:var(--accent-secondary);font-size:0.75rem;font-weight:600;cursor:pointer;">⚡ Regenerate</button>
             </div>
-            <div class="form-group">
-              <label>Last Name *</label>
-              <input type="text" [(ngModel)]="newStaff.last_name" name="s_last" required class="sa-search-input modal-input" placeholder="Last name">
-            </div>
-            <div class="form-group">
-              <label>Father's Name *</label>
-              <input type="text" [(ngModel)]="newStaff.father_name" name="s_father" required class="sa-search-input modal-input" placeholder="Father's name">
-            </div>
-            <div class="form-group">
-              <label>Mobile *</label>
-              <input type="text" [(ngModel)]="newStaff.mobile_number" name="s_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
-            </div>
-            <div class="form-group">
-              <label>Email *</label>
-              <input type="email" [(ngModel)]="newStaff.email" name="s_email" required class="sa-search-input modal-input" placeholder="Email address">
-            </div>
-            <div class="form-group">
-              <label>CNIC *</label>
-              <input type="text" [(ngModel)]="newStaff.cnic" name="s_cnic" required class="sa-search-input modal-input" placeholder="e.g. 42101-1234567-1">
-            </div>
-            <div class="form-group">
-              <label>Designation *</label>
-              <input type="text" [(ngModel)]="newStaff.designation" name="s_designation" required class="sa-search-input modal-input" placeholder="e.g. Librarian">
-            </div>
-            <div class="form-group" style="grid-column:1/-1;">
-              <label>Address *</label>
-              <input type="text" [(ngModel)]="newStaff.address" name="s_addr" required class="sa-search-input modal-input" placeholder="Full address">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;background:rgba(47,128,237,0.04);padding:0.9rem;border-radius:10px;border:1px dashed var(--glass-border);">
+              <div class="form-group">
+                <label>Login Email / Username *</label>
+                <input type="email" [(ngModel)]="newStaff.email" name="s_email" required class="sa-search-input modal-input" placeholder="Email address">
+              </div>
+              <div class="form-group">
+                <label>Auto-Generated Password *</label>
+                <input type="text" [(ngModel)]="newStaff.password" name="s_pass" required class="sa-search-input modal-input" style="font-weight:700;letter-spacing:0.05em;color:var(--accent-primary);" placeholder="Password">
+              </div>
             </div>
           </div>
+
 
           <!-- ---- CLASS FORM ---- -->
           <div *ngIf="createUserRole() === 'class'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
@@ -1092,50 +1113,159 @@
             </div>
           </div>
 
-          <!-- ---- STUDENT FORM ---- -->
-          <div *ngIf="createUserRole() === 'student'" style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
-            <div class="form-group">
-              <label>First Name *</label>
-              <input type="text" [(ngModel)]="newStudent.first_name" name="stu_first" required class="sa-search-input modal-input" placeholder="First name">
+          <!-- ---- STUDENT ADMISSION & REGISTRATION FORM ---- -->
+          <div *ngIf="createUserRole() === 'student'" style="display:flex;flex-direction:column;gap:1rem;">
+            
+            <!-- Section: Personal Details -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;">
+              Personal Details
             </div>
-            <div class="form-group">
-              <label>Middle Name</label>
-              <input type="text" [(ngModel)]="newStudent.middle_name" name="stu_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" [(ngModel)]="newStudent.first_name" name="stu_first" (input)="generateCredentials()" required class="sa-search-input modal-input" placeholder="First name">
+              </div>
+              <div class="form-group">
+                <label>Middle Name</label>
+                <input type="text" [(ngModel)]="newStudent.middle_name" name="stu_middle" class="sa-search-input modal-input" placeholder="Middle name (optional)">
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" [(ngModel)]="newStudent.last_name" name="stu_last" (input)="generateCredentials()" required class="sa-search-input modal-input" placeholder="Last name">
+              </div>
+              <div class="form-group">
+                <label>Father / Guardian Name *</label>
+                <input type="text" [(ngModel)]="newStudent.father_name" name="stu_father" required class="sa-search-input modal-input" placeholder="Father's name">
+              </div>
+              <div class="form-group">
+                <label>Father's Profession</label>
+                <input type="text" [(ngModel)]="newStudent.father_profession" name="stu_fprof" class="sa-search-input modal-input" placeholder="e.g. Business, Engineer">
+              </div>
             </div>
-            <div class="form-group">
-              <label>Last Name *</label>
-              <input type="text" [(ngModel)]="newStudent.last_name" name="stu_last" required class="sa-search-input modal-input" placeholder="Last name">
+
+            <!-- Section: Academic Details -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;margin-top:0.5rem;">
+              Academic Details
             </div>
-            <div class="form-group">
-              <label>Father's Name *</label>
-              <input type="text" [(ngModel)]="newStudent.father_name" name="stu_father" required class="sa-search-input modal-input" placeholder="Father's name">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group">
+                <label>Class *</label>
+                <input type="text" [(ngModel)]="newStudent.class_name" name="stu_class" required class="sa-search-input modal-input" placeholder="e.g. 11th, 12th">
+              </div>
+              <div class="form-group">
+                <label>Section</label>
+                <input type="text" [(ngModel)]="newStudent.section" name="stu_sec" class="sa-search-input modal-input" placeholder="e.g. A, B">
+              </div>
+              <div class="form-group">
+                <label>Group / Department *</label>
+                <select [(ngModel)]="newStudent.department" name="stu_dept" class="sa-search-input modal-input">
+                  <option value="Pre. Engineering">Pre. Engineering</option>
+                  <option value="Pre. Medical">Pre. Medical</option>
+                  <option value="Comp. Science">Computer Science</option>
+                  <option value="Commerce">Commerce</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Previous School / College</label>
+                <input type="text" [(ngModel)]="newStudent.school_college" name="stu_school" class="sa-search-input modal-input" placeholder="School/College Name">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Last Qualification</label>
+                <input type="text" [(ngModel)]="newStudent.last_qualification" name="stu_qual" class="sa-search-input modal-input" placeholder="e.g. Matric, O-Levels">
+              </div>
             </div>
-            <div class="form-group">
-              <label>Mobile *</label>
-              <input type="text" [(ngModel)]="newStudent.mobile_number" name="stu_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+
+            <!-- Section: Contact Details -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;margin-top:0.5rem;">
+              Contact & Location
             </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="newStudent.email" name="stu_email" class="sa-search-input modal-input" placeholder="Email address (optional)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+              <div class="form-group">
+                <label>Mobile Number *</label>
+                <input type="text" [(ngModel)]="newStudent.mobile_number" name="stu_mobile" required class="sa-search-input modal-input" placeholder="e.g. 03001234567">
+              </div>
+              <div class="form-group">
+                <label>WhatsApp Number</label>
+                <input type="text" [(ngModel)]="newStudent.whatsapp" name="stu_wa" class="sa-search-input modal-input" placeholder="For notifications">
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Address *</label>
+                <input type="text" [(ngModel)]="newStudent.address" name="stu_addr" required class="sa-search-input modal-input" placeholder="Complete address">
+              </div>
             </div>
-            <div class="form-group">
-              <label>Password *</label>
-              <input type="password" [(ngModel)]="newStudent.password" name="stu_pass" required class="sa-search-input modal-input" placeholder="Password">
+
+            <!-- Section: Login Credentials (Auto-Generated) -->
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-secondary);border-bottom:1px solid var(--glass-border);padding-bottom:0.3rem;margin-top:0.5rem;display:flex;align-items:center;justify-content:space-between;">
+              <span>Student Credentials (Auto-Generated)</span>
+              <button type="button" (click)="generateCredentials()" style="background:none;border:none;color:var(--accent-secondary);font-size:0.75rem;font-weight:600;cursor:pointer;">⚡ Regenerate</button>
             </div>
-            <div class="form-group">
-              <label>Confirm Password *</label>
-              <input type="password" [(ngModel)]="newStudent.confirm_password" name="stu_cpass" required class="sa-search-input modal-input" placeholder="Confirm password">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;background:rgba(47,128,237,0.04);padding:0.9rem;border-radius:10px;border:1px dashed var(--glass-border);">
+              <div class="form-group">
+                <label>Login Email / Username *</label>
+                <input type="email" [(ngModel)]="newStudent.email" name="stu_email" required class="sa-search-input modal-input" placeholder="student.username@jeacademy.edu">
+              </div>
+              <div class="form-group">
+                <label>Auto-Generated Password *</label>
+                <input type="text" [(ngModel)]="newStudent.password" name="stu_pass" required class="sa-search-input modal-input" style="font-weight:700;letter-spacing:0.05em;color:var(--accent-primary);" placeholder="Password">
+              </div>
             </div>
+
           </div>
 
-          <div class="modal-actions" style="margin-top:1.2rem;">
+          <div class="modal-actions" style="margin-top:1.4rem;">
             <button type="button" class="btn-secondary" (click)="closeCreateModal()">Cancel</button>
-            <button type="submit" class="btn-primary">Create {{ createUserRole() | titlecase }}</button>
+            <button type="submit" class="btn-primary">Enroll & Create Credentials</button>
           </div>
         </form>
       </div>
     </div>
   </div>
+
+  <!-- ========== CREATED CREDENTIALS DISPLAY MODAL ========== -->
+  <div class="modal-overlay" *ngIf="showCredentialsModal()" (click)="closeCredentialsModal()">
+    <div class="modal-content glass-card" style="max-width:480px;text-align:center;" (click)="$event.stopPropagation()">
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(16,185,129,0.12);color:var(--accent-success);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <svg lucideCheckCircle style="width:2.2rem;height:2.2rem;"></svg>
+      </div>
+
+      <h2 style="font-size:1.4rem;font-weight:800;color:var(--text-primary);margin-bottom:0.25rem;">Student Registered & Enrolled!</h2>
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1.4rem;">Student account created and admission approved automatically. Share these credentials with the student:</p>
+
+      <div style="background:#f8fafc;border:1px solid var(--glass-border);border-radius:12px;padding:1.25rem;text-align:left;display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;" *ngIf="createdCredentials()">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--glass-border);padding-bottom:0.6rem;">
+          <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Student Name</span>
+          <span style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ createdCredentials()?.name }}</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--glass-border);padding-bottom:0.6rem;">
+          <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">GR Number</span>
+          <span class="code-chip" style="font-size:0.85rem;">{{ createdCredentials()?.gr_number }}</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--glass-border);padding-bottom:0.6rem;">
+          <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Login Username / Email</span>
+          <span style="font-size:0.9rem;font-weight:700;color:var(--accent-primary);user-select:all;">{{ createdCredentials()?.email }}</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Password</span>
+          <span style="font-size:0.95rem;font-weight:800;color:var(--accent-secondary);background:rgba(47,128,237,0.1);padding:0.2rem 0.6rem;border-radius:6px;letter-spacing:0.05em;user-select:all;">{{ createdCredentials()?.password }}</span>
+        </div>
+
+      </div>
+
+      <div style="display:flex;gap:0.8rem;">
+        <button class="btn-secondary" style="flex:1;" (click)="closeCredentialsModal()">Done</button>
+        <button class="btn-primary" style="flex:1.5;" (click)="copyCredentialsToClipboard()">
+          <svg lucideFileText style="width:1.1rem;height:1.1rem;margin-right:0.3rem;"></svg>
+          Copy Credentials
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 
   <!-- ========== EDIT CLASS MODAL ========== -->
   <div class="modal-overlay" *ngIf="showEditClassModal()" (click)="closeEditClassModal()">

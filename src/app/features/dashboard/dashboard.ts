@@ -72,14 +72,28 @@ export class Dashboard implements OnInit {
   currentUser = computed(() => this.authService.currentUser());
   userRole = computed(() => this.currentUser()?.role || 'student');
 
+  studentAdmissionStatus = signal<string>('APPROVED');
+
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
     }
+
+    if (this.userRole() === 'student') {
+      this.authService.getMe().subscribe({
+        next: (profile) => {
+          this.studentAdmissionStatus.set(profile?.admission_status || 'NOT_SUBMITTED');
+        }
+      });
+    }
   }
 
   navigateStudent(page: string): void {
+    if (this.studentAdmissionStatus() !== 'APPROVED' && page !== 'dashboard') {
+      this.showToast('Please submit your admission form and wait for admin approval to access this section.', 'error');
+      return;
+    }
     this.studentActivePage.set(page);
     if (page !== 'class' && page !== 'class-detail') {
       this.classMenuOpen.set(false);
@@ -91,6 +105,10 @@ export class Dashboard implements OnInit {
   }
 
   toggleClassMenu(): void {
+    if (this.studentAdmissionStatus() !== 'APPROVED') {
+      this.showToast('Please submit your admission form and wait for admin approval to access class section.', 'error');
+      return;
+    }
     this.classMenuOpen.update(v => !v);
     if (this.classMenuOpen()) {
       this.studentActivePage.set('class');

@@ -23,4 +23,9 @@ export class StudentService {
     formData.append('status', status);
     return this.http.put<any>(`${this.apiUrl}/students/status/${userId}`, formData);
   }
+
+  directCreateStudent(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/students/direct-create`, data);
+  }
 }
+

@@ -8,12 +8,19 @@ export interface User {
   password?: string;
   name?: string;
   role?: 'student' | 'teacher' | 'admin';
+  // Registration fields
   first_name?: string;
   middle_name?: string;
   last_name?: string;
   father_name?: string;
   mobile_number?: string;
   confirm_password?: string;
+  // Student admission fields (returned by /auth/me)
+  id?: string;
+  admission_status?: 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  rejection_reason?: string | null;
+  gr_number?: string | null;
+  status?: string;
 }
 
 @Injectable({

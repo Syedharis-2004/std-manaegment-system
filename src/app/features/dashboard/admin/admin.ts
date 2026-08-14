@@ -126,11 +126,28 @@ export class AdminDashboard implements OnInit {
   showCreateModal = signal<boolean>(false);
   createUserRole = signal<'student' | 'teacher' | 'staff' | 'class'>('student');
 
-  // Student create form
+  // Credentials modal signals
+  showCredentialsModal = signal<boolean>(false);
+  createdCredentials = signal<any | null>(null);
+  showPasswordInModal = signal<boolean>(false);
+
+  // Student create & admission form
   newStudent = {
-    first_name: '', middle_name: '', last_name: '',
-    father_name: '', mobile_number: '', email: '',
-    password: '', confirm_password: '', role: 'student' as const
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    father_name: '',
+    father_profession: '',
+    mobile_number: '',
+    email: '',
+    password: '',
+    class_name: '',
+    section: '',
+    department: 'Pre. Engineering',
+    address: '',
+    whatsapp: '',
+    school_college: '',
+    last_qualification: ''
   };
 
   // Teacher create form
@@ -145,7 +162,7 @@ export class AdminDashboard implements OnInit {
   newStaff = {
     first_name: '', middle_name: '', last_name: '',
     father_name: '', mobile_number: '', email: '',
-    cnic: '', designation: '', address: ''
+    password: '', cnic: '', designation: '', address: ''
   };
 
   // Class create form
@@ -167,12 +184,51 @@ export class AdminDashboard implements OnInit {
   showStaffDetail = signal<boolean>(false);
   selectedStaffMember = signal<any | null>(null);
 
+  generateCredentials(): void {
+    const first = (this.newStudent.first_name || 'student').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const last = (this.newStudent.last_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rand = Math.floor(100 + Math.random() * 900);
+    this.newStudent.email = `${first || 'std'}.${last || 'user'}${rand}@jeacademy.edu`;
+    this.newStudent.password = `Std#${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
+  generateTeacherCredentials(): void {
+    const first = (this.newTeacher.first_name || 'teacher').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const last = (this.newTeacher.last_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rand = Math.floor(100 + Math.random() * 900);
+    this.newTeacher.email = `${first || 'teacher'}.${last || 'user'}${rand}@jeacademy.edu`;
+    this.newTeacher.password = `Teach#${Math.floor(1000 + Math.random() * 9000)}`;
+    this.newTeacher.confirm_password = this.newTeacher.password;
+  }
+
+  generateStaffCredentials(): void {
+    const first = (this.newStaff.first_name || 'staff').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const last = (this.newStaff.last_name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const rand = Math.floor(100 + Math.random() * 900);
+    this.newStaff.email = `${first || 'staff'}.${last || 'user'}${rand}@jeacademy.edu`;
+    this.newStaff.password = `Staff#${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+
   openCreateModal(role: 'student' | 'teacher' | 'staff' | 'class') {
     this.createUserRole.set(role);
-    this.newStudent = { first_name: '', middle_name: '', last_name: '', father_name: '', mobile_number: '', email: '', password: '', confirm_password: '', role: 'student' };
+    this.newStudent = {
+      first_name: '', middle_name: '', last_name: '',
+      father_name: '', father_profession: '', mobile_number: '',
+      email: '', password: '', class_name: '', section: '',
+      department: 'Pre. Engineering', address: '', whatsapp: '',
+      school_college: '', last_qualification: ''
+    };
     this.newTeacher = { first_name: '', middle_name: '', last_name: '', father_name: '', mobile_number: '', email: '', password: '', confirm_password: '', cnic: '', qualification: '', experience: '', subject: '', address: '' };
-    this.newStaff = { first_name: '', middle_name: '', last_name: '', father_name: '', mobile_number: '', email: '', cnic: '', designation: '', address: '' };
+    this.newStaff = { first_name: '', middle_name: '', last_name: '', father_name: '', mobile_number: '', email: '', password: '', cnic: '', designation: '', address: '' };
     this.newClass = { class_name: '', section_name: '', starting_gr: '', start_time: '', end_time: '', status: 'ACTIVE' };
+
+    if (role === 'student') {
+      this.generateCredentials();
+    } else if (role === 'teacher') {
+      this.generateTeacherCredentials();
+    } else if (role === 'staff') {
+      this.generateStaffCredentials();
+    }
     this.showCreateModal.set(true);
   }
 
@@ -180,18 +236,55 @@ export class AdminDashboard implements OnInit {
     this.showCreateModal.set(false);
   }
 
+  closeCredentialsModal() {
+    this.showCredentialsModal.set(false);
+    this.createdCredentials.set(null);
+  }
+
+  copyCredentialsToClipboard(): void {
+    const c = this.createdCredentials();
+    if (!c) return;
+    const text = `JE ACADEMY - ${c.role?.toUpperCase() || 'USER'} CREDENTIALS\n` +
+      `===============================\n` +
+      `Name: ${c.name}\n` +
+      (c.gr_number ? `GR Number: ${c.gr_number}\n` : '') +
+      (c.class_info ? `Class: ${c.class_info}\n` : '') +
+      (c.subject ? `Subject: ${c.subject}\n` : '') +
+      (c.designation ? `Designation: ${c.designation}\n` : '') +
+      `Login Email/Username: ${c.email}\n` +
+      `Password: ${c.password}\n` +
+      `Mobile: ${c.mobile_number}\n` +
+      `===============================`;
+
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast('Credentials copied to clipboard!');
+    }).catch(() => {
+      this.showToast('Credentials ready. You can copy them manually.');
+    });
+  }
+
   onCreateUserSubmit() {
     const role = this.createUserRole();
 
     if (role === 'student') {
-      this.authService.register(this.newStudent).subscribe({
-        next: () => {
-          this.showToast('Student registered successfully!');
+      if (!this.newStudent.email || !this.newStudent.password) {
+        this.generateCredentials();
+      }
+      this.studentService.directCreateStudent(this.newStudent).subscribe({
+        next: (res: any) => {
+          this.showToast('Student created and enrolled successfully!');
+          if (res.credentials) {
+            this.createdCredentials.set({
+              ...res.credentials,
+              role: 'Student'
+            });
+            this.showCredentialsModal.set(true);
+          }
           this.loadDashboardData();
           this.closeCreateModal();
         },
-        error: (err) => {
-          this.showToast(err.message || 'Failed to register student');
+        error: (err: any) => {
+          this.showToast(err.error?.detail || err.message || 'Failed to create student');
         }
       });
       return;
@@ -199,16 +292,48 @@ export class AdminDashboard implements OnInit {
 
     if (role === 'teacher') {
       const formData = new FormData();
+      if (!this.newTeacher.email || !this.newTeacher.password) {
+        this.generateTeacherCredentials();
+      }
       Object.entries(this.newTeacher).forEach(([k, v]) => formData.append(k, v));
       this.teacherService.addTeacher(formData).subscribe({
-        next: () => { this.showToast('Teacher created successfully!'); this.loadDashboardData(); this.closeCreateModal(); },
+        next: () => {
+          this.showToast('Teacher created successfully!');
+          this.createdCredentials.set({
+            name: `${this.newTeacher.first_name} ${this.newTeacher.last_name}`,
+            role: 'Teacher',
+            email: this.newTeacher.email,
+            password: this.newTeacher.password,
+            mobile_number: this.newTeacher.mobile_number,
+            subject: this.newTeacher.subject
+          });
+          this.showCredentialsModal.set(true);
+          this.loadDashboardData();
+          this.closeCreateModal();
+        },
         error: (err) => { this.showToast(err.error?.detail || 'Failed to create teacher'); }
       });
     } else if (role === 'staff') {
       const formData = new FormData();
+      if (!this.newStaff.email || !this.newStaff.password) {
+        this.generateStaffCredentials();
+      }
       Object.entries(this.newStaff).forEach(([k, v]) => formData.append(k, v));
       this.staffService.addStaff(formData).subscribe({
-        next: () => { this.showToast('Staff member created successfully!'); this.loadDashboardData(); this.closeCreateModal(); },
+        next: () => {
+          this.showToast('Staff member created successfully!');
+          this.createdCredentials.set({
+            name: `${this.newStaff.first_name} ${this.newStaff.last_name}`,
+            role: 'Staff Member',
+            email: this.newStaff.email,
+            password: this.newStaff.password || 'N/A',
+            mobile_number: this.newStaff.mobile_number,
+            designation: this.newStaff.designation
+          });
+          this.showCredentialsModal.set(true);
+          this.loadDashboardData();
+          this.closeCreateModal();
+        },
         error: (err) => { this.showToast(err.error?.detail || 'Failed to create staff'); }
       });
     } else if (role === 'class') {
@@ -220,6 +345,7 @@ export class AdminDashboard implements OnInit {
       });
     }
   }
+
 
   // Edit class
   openEditClassModal(cls: any): void {

@@ -11,6 +11,8 @@ import { StudentTeacherService } from '../../../core/services/student-teacher';
 import { StudentAssignmentService } from '../../../core/services/student-assignment';
 import { environment } from '@env/environment';
 
+import { AdmissionForm } from '../../admission/admission-form';
+
 import {
   LucideCheckCircle,
   LucideBookOpen,
@@ -30,6 +32,7 @@ import {
   selector: 'app-student-dashboard',
   imports: [
     CommonModule,
+    AdmissionForm,
     LucideCheckCircle,
     LucideBookOpen,
     LucideClock,
@@ -44,7 +47,7 @@ import {
     LucideAlertTriangle
   ],
   templateUrl: './student.html',
-  styleUrl: './student.css'
+  styleUrls: ['./student.css']
 })
 export class StudentDashboard implements OnInit {
   private http = inject(HttpClient);
@@ -148,6 +151,13 @@ export class StudentDashboard implements OnInit {
   todaySchedule = signal<any[]>([]);
   todayName = signal<string>('');
 
+  // Admission Status State
+  // Possible values: 'LOADING' | 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED'
+  admissionStatus = signal<string>('LOADING');
+
+  // Rejection reason returned by /auth/me when status is REJECTED
+  rejectionReason = signal<string | null>(null);
+
   getStudentTimetableSlot(day: string, periodNo: number): any {
     const schedule = this.studentTimetable()?.schedule || [];
     return schedule.find((s: any) => s.day === day && s.period_no === periodNo) || null;
@@ -166,14 +176,19 @@ export class StudentDashboard implements OnInit {
   }
 
   ngOnInit(): void {
+    // Step 1: Verify the user has a valid student role token by calling the dashboard endpoint.
+    // This endpoint now returns 200 for ALL authenticated students (not just APPROVED ones).
+    // We do NOT use its response for admission decisions — /auth/me is used for that.
     this.http.get<any>(`${this.apiUrl}/dashboard/student`).subscribe({
-      next: (res) => {
-        this.backendMessage.set(res.message || 'Access granted!');
+      next: () => {
+        // Student is authenticated and has the correct role.
+        // Proceed to load their profile and determine admission state.
         this.isAuthorized.set(true);
         this.isLoading.set(false);
         this.loadStudentData();
       },
       error: (err) => {
+        // 401/403 = truly unauthorized (wrong role, invalid token, etc.)
         this.backendMessage.set(err.error?.detail || 'Unauthorized student access!');
         this.isAuthorized.set(false);
         this.isLoading.set(false);
@@ -181,15 +196,44 @@ export class StudentDashboard implements OnInit {
     });
   }
 
+  refreshAdmissionStatus(): void {
+    this.admissionStatus.set('LOADING');
+    this.isLoading.set(true);
+    this.loadStudentData();
+  }
+
+  handleAdmissionSubmitted(newStatus: string = 'PENDING'): void {
+    // Instantly transition UI to PENDING review state without blocking full-page reload
+    this.admissionStatus.set(newStatus);
+    this.isLoading.set(false);
+    // Background sync profile
+    this.loadStudentData();
+  }
+
+  /**
+   * loadStudentData()
+   *
+   * Calls /auth/me to get the current student's profile, reads admission_status,
+   * and decides what data to load:
+   *
+   * - NOT_SUBMITTED / PENDING / REJECTED → show admission UI, do NOT load protected data
+   * - APPROVED → load full student dashboard data
+   */
   loadStudentData(): void {
     this.authService.getMe().subscribe({
       next: (profile) => {
-        if (profile?.admission_status === 'NOT_SUBMITTED') {
-          this.showAdmissionModal.set(true);
-          return;
+        const status: string = profile?.admission_status || 'NOT_SUBMITTED';
+        this.admissionStatus.set(status);
+        this.isLoading.set(false);
+
+        if (status === 'REJECTED') {
+          // Store rejection reason for display
+          this.rejectionReason.set(profile?.rejection_reason || null);
         }
 
-        if (profile?.admission_status === 'APPROVED') {
+        if (status === 'APPROVED') {
+          // ── Full dashboard data loading ──────────────────────────────────────
+          // Load real student details (class, section, gr_number)
           this.studentService.getStudentDetails(profile.id).subscribe({
             next: (details) => {
               this.myClassInfo.set({
@@ -202,6 +246,7 @@ export class StudentDashboard implements OnInit {
             error: () => console.error('Could not fetch real class details')
           });
 
+          // Load class info, timetable, and today's schedule
           this.studentClassService.getStudentClass().subscribe({
             next: (data) => {
               if (data) {
@@ -221,6 +266,7 @@ export class StudentDashboard implements OnInit {
             error: (err) => console.error('Could not fetch student class data', err)
           });
 
+          // Load fee history
           this.studentFeeService.getFeeHistory().subscribe({
             next: (fees) => {
               this.feeHistory.set(fees.map((fee: any, index: number) => ({
@@ -236,6 +282,7 @@ export class StudentDashboard implements OnInit {
             error: (err) => console.error('Could not fetch fee history', err)
           });
 
+          // Load notices
           this.studentNoticeService.getNotices().subscribe({
             next: (notices) => {
               this.notices.set(notices.map((notice: any) => ({
@@ -250,6 +297,7 @@ export class StudentDashboard implements OnInit {
             error: (err) => console.error('Could not fetch notices', err)
           });
 
+          // Load teachers
           this.studentTeacherService.getStudentTeachers().subscribe({
             next: (teachers) => {
               this.teachers.set(teachers.map((teacher: any) => ({
@@ -275,10 +323,18 @@ export class StudentDashboard implements OnInit {
             next: (results) => this.testResults.set(results),
             error: (err) => console.error('Could not fetch test results', err)
           });
+
+          // ── End of APPROVED data loading ─────────────────────────────────────
         }
+        // For NOT_SUBMITTED, PENDING, REJECTED — no protected data is loaded.
+        // The template handles the UI for each state via admissionStatus().
       },
-      error: () => {
-        // Silently fail — don't block dashboard
+      error: (err) => {
+        // If /auth/me fails after successful dashboard auth, set to NOT_SUBMITTED
+        // to show the admission form rather than a blank screen.
+        console.error('Could not fetch student profile:', err);
+        this.admissionStatus.set('NOT_SUBMITTED');
+        this.isLoading.set(false);
       }
     });
   }

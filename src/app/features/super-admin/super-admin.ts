@@ -2,6 +2,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
+import { AdminService } from '../../core/services/admin';
+import { NoticeService } from '../../core/services/notice';
+import { ActivityLogService } from '../../core/services/activity-log';
+import { SettingsService } from '../../core/services/settings';
+import { ProfileService } from '../../core/services/profile';
 import {
   LucideLayoutDashboard,
   LucideSchool,
@@ -51,6 +56,11 @@ type Page = 'dashboard' | 'class' | 'users' | 'admissions';
 })
 export class SuperAdmin implements OnInit {
   private authService = inject(AuthService);
+  private adminService = inject(AdminService);
+  private noticeService = inject(NoticeService);
+  private activityLogService = inject(ActivityLogService);
+  private settingsService = inject(SettingsService);
+  private profileService = inject(ProfileService);
   private router = inject(Router);
 
   // Phase control: select institution first, then show dashboard
@@ -59,6 +69,15 @@ export class SuperAdmin implements OnInit {
   userRoleFilter = signal<string | null>(null);
 
   currentUser = signal<any>(null);
+
+  // Live Backend Data Signals
+  backendAdmins = signal<any[]>([]);
+  backendNotices = signal<any[]>([]);
+  backendActivityLogs = signal<any[]>([]);
+  backendSettings = signal<any>(null);
+  userProfile = signal<any>(null);
+  isLoadingData = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
 
   // ── Mock Data: J.E Academy ─────────────────────────────────────────────────
   jeData = {
@@ -205,6 +224,44 @@ export class SuperAdmin implements OnInit {
       return;
     }
     this.currentUser.set(user);
+    this.fetchBackendData();
+  }
+
+  fetchBackendData(): void {
+    this.isLoadingData.set(true);
+
+    // Fetch user profile
+    this.profileService.getProfile().subscribe({
+      next: (profile) => this.userProfile.set(profile),
+      error: () => {}
+    });
+
+    // Fetch notices
+    this.noticeService.getNotices().subscribe({
+      next: (notices) => this.backendNotices.set(notices),
+      error: () => {}
+    });
+
+    // Fetch admins if user is super admin
+    this.adminService.getAdmins().subscribe({
+      next: (admins) => this.backendAdmins.set(admins),
+      error: () => {}
+    });
+
+    // Fetch activity logs if user is super admin
+    this.activityLogService.getActivityLogs().subscribe({
+      next: (logs) => this.backendActivityLogs.set(logs),
+      error: () => {}
+    });
+
+    // Fetch settings
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.backendSettings.set(settings);
+        this.isLoadingData.set(false);
+      },
+      error: () => this.isLoadingData.set(false)
+    });
   }
 
   selectInstitution(inst: Institution): void {

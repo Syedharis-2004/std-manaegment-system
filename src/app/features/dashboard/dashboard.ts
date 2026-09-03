@@ -80,7 +80,13 @@ export class Dashboard implements OnInit {
       return;
     }
 
-    if (this.userRole() === 'student') {
+    const role = (this.userRole() || '').toLowerCase();
+    if (role === 'super_admin') {
+      this.router.navigate(['/super-admin']);
+      return;
+    }
+
+    if (role === 'student') {
       this.authService.getMe().subscribe({
         next: (profile) => {
           this.studentAdmissionStatus.set(profile?.admission_status || 'NOT_SUBMITTED');

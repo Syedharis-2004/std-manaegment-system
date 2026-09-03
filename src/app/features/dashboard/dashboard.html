@@ -102,7 +102,7 @@
       </ng-container>
 
       <!-- Admin Menu -->
-      <ng-container *ngIf="userRole() === 'admin'">
+      <ng-container *ngIf="userRole().toLowerCase() === 'admin' || userRole().toLowerCase() === 'super_admin'">
         <button class="menu-item" [class.active]="adminActivePage() === 'dashboard'" (click)="navigateAdmin('dashboard')">
           <svg lucideLayoutDashboard class="menu-icon"></svg>
           <span>Dashboard</span>
@@ -180,11 +180,11 @@
     <!-- Role Based Dynamic Dashboards (Component Based Architecture) -->
     <div class="dashboard-viewport">
       <app-student-dashboard
-        *ngIf="userRole() === 'student'"
+        *ngIf="userRole().toLowerCase() === 'student'"
         [(activePage)]="studentActivePage">
       </app-student-dashboard>
-      <app-teacher-dashboard *ngIf="userRole() === 'teacher'"></app-teacher-dashboard>
-      <app-admin-dashboard *ngIf="userRole() === 'admin'" [(activePage)]="adminActivePage"></app-admin-dashboard>
+      <app-teacher-dashboard *ngIf="userRole().toLowerCase() === 'teacher'"></app-teacher-dashboard>
+      <app-admin-dashboard *ngIf="userRole().toLowerCase() === 'admin' || userRole().toLowerCase() === 'super_admin'" [(activePage)]="adminActivePage"></app-admin-dashboard>
     </div>
 
   </main>

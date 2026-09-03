@@ -44,24 +44,34 @@ export class Login {
             next: (profile) => {
               this.isLoading.set(false);
               const fullName = `${profile.first_name} ${profile.last_name}`;
+              const userRole = (profile.role || response.role || '').toLowerCase();
               const sessionUser = {
                 email: profile.email || email!,
                 name: fullName,
-                role: profile.role
+                role: userRole
               };
               localStorage.setItem('edu_user', JSON.stringify(sessionUser));
               this.authService.currentUser.set(sessionUser);
 
               this.successMessage.set('Login Successful! Redirecting...');
               setTimeout(() => {
-                this.router.navigate(['/dashboard']);
+                if (userRole === 'super_admin') {
+                  this.router.navigate(['/super-admin']);
+                } else {
+                  this.router.navigate(['/dashboard']);
+                }
               }, 1200);
             },
             error: () => {
               this.isLoading.set(false);
+              const userRole = (response.role || '').toLowerCase();
               this.successMessage.set('Login Successful! Redirecting...');
               setTimeout(() => {
-                this.router.navigate(['/dashboard']);
+                if (userRole === 'super_admin') {
+                  this.router.navigate(['/super-admin']);
+                } else {
+                  this.router.navigate(['/dashboard']);
+                }
               }, 1200);
             }
           });

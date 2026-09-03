@@ -1,11 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
 import { AdminService } from '../../core/services/admin';
-import { NoticeService } from '../../core/services/notice';
-import { ActivityLogService } from '../../core/services/activity-log';
-import { SettingsService } from '../../core/services/settings';
+import { StudentService } from '../../core/services/student';
+import { TeacherService } from '../../core/services/teacher';
+import { StaffService } from '../../core/services/staff';
+import { AdmissionService } from '../../core/services/admission';
 import { ProfileService } from '../../core/services/profile';
 import {
   LucideLayoutDashboard,
@@ -23,7 +26,8 @@ import {
   LucideClock,
   LucideSearch,
   LucideStar,
-  LucideUserCog
+  LucideUserCog,
+  LucideRefreshCw
 } from '@lucide/angular';
 
 type Institution = 'je-academy' | 'kids-academy';
@@ -49,115 +53,84 @@ type Page = 'dashboard' | 'class' | 'users' | 'admissions';
     LucideClock,
     LucideSearch,
     LucideStar,
-    LucideUserCog
+    LucideUserCog,
+    LucideRefreshCw
   ],
   templateUrl: './super-admin.html',
   styleUrl: './super-admin.css'
 })
 export class SuperAdmin implements OnInit {
-  private authService = inject(AuthService);
-  private adminService = inject(AdminService);
-  private noticeService = inject(NoticeService);
-  private activityLogService = inject(ActivityLogService);
-  private settingsService = inject(SettingsService);
+  private authService    = inject(AuthService);
+  private adminService   = inject(AdminService);
+  private studentService = inject(StudentService);
+  private teacherService = inject(TeacherService);
+  private staffService   = inject(StaffService);
+  private admissionService = inject(AdmissionService);
   private profileService = inject(ProfileService);
-  private router = inject(Router);
+  private router         = inject(Router);
 
-  // Phase control: select institution first, then show dashboard
+  // Phase control
   selectedInstitution = signal<Institution | null>('je-academy');
   activePage = signal<Page>('dashboard');
   userRoleFilter = signal<string | null>(null);
 
   currentUser = signal<any>(null);
-
-  // Live Backend Data Signals
-  backendAdmins = signal<any[]>([]);
-  backendNotices = signal<any[]>([]);
-  backendActivityLogs = signal<any[]>([]);
-  backendSettings = signal<any>(null);
   userProfile = signal<any>(null);
+
+  // Live stats from /dashboard/super-admin
+  liveStats = signal<{
+    totalStudents: number;
+    totalTeachers: number;
+    totalStaff: number;
+    totalAdmins: number;
+    totalClasses: number;
+    pendingAdmissions: number;
+  }>({
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalStaff: 0,
+    totalAdmins: 0,
+    totalClasses: 0,
+    pendingAdmissions: 0
+  });
+
+  // Live user lists from APIs
+  liveUsers = signal<any[]>([]);
+  liveAdmissions = signal<any[]>([]);
+
   isLoadingData = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
 
-  // ── Mock Data: J.E Academy ─────────────────────────────────────────────────
-  jeData = {
-    stats: {
-      totalStudents: 842,
-      totalTeachers: 64,
-      totalClasses: 24,
-      pendingAdmissions: 12,
-      totalStaff: 18
-    },
-    classes: [
-      { id: 'CS-4A', program: 'Computer Science', semester: '7th', students: 38, teacher: 'Dr. Sarah Connor', room: 'CS-301', status: 'active' },
-      { id: 'CS-3B', program: 'Computer Science', semester: '5th', students: 34, teacher: 'Prof. Alan Turing', room: 'CS-204', status: 'active' },
-      { id: 'SE-2A', program: 'Software Engineering', semester: '3rd', students: 41, teacher: 'Dr. John McCarthy', room: 'SE-101', status: 'active' },
-      { id: 'IT-1B', program: 'Information Technology', semester: '1st', students: 45, teacher: 'Mary Shelley', room: 'IT-102', status: 'active' },
-      { id: 'BBA-2B', program: 'Business Administration', semester: '3rd', students: 36, teacher: 'Prof. Adam Smith', room: 'BBA-201', status: 'active' },
-      { id: 'ECO-1A', program: 'Economics', semester: '1st', students: 30, teacher: 'Dr. Keynes', room: 'ECO-103', status: 'inactive' },
-    ],
-    users: [
-      { id: 'U-001', name: 'Dr. Sarah Connor',   email: 'sconnor@je.edu',     role: 'teacher', status: 'active',   joined: 'Jan 2023' },
-      { id: 'U-002', name: 'Prof. Alan Turing',  email: 'aturing@je.edu',     role: 'teacher', status: 'active',   joined: 'Mar 2022' },
-      { id: 'U-003', name: 'Haris Zaidi',        email: 'haris@je.edu',       role: 'admin',   status: 'active',   joined: 'Jul 2024' },
-      { id: 'U-004', name: 'Alice Smith',         email: 'asmith@je.edu',     role: 'student', status: 'active',   joined: 'Sep 2024' },
-      { id: 'U-005', name: 'John Doe',            email: 'jdoe@je.edu',       role: 'student', status: 'inactive', joined: 'Sep 2024' },
-      { id: 'U-006', name: 'Fatima Noor',         email: 'fnoor@je.edu',      role: 'student', status: 'active',   joined: 'Jan 2025' },
-      { id: 'U-007', name: 'Mary Shelley',        email: 'mshelley@je.edu',   role: 'teacher', status: 'active',   joined: 'Aug 2021' },
-      { id: 'U-008', name: 'Taha Waseem',         email: 'taha@je.edu',       role: 'student', status: 'active',   joined: 'Feb 2025' },
-      { id: 'U-009', name: 'Robert Brown',        email: 'rbrown@je.edu',     role: 'staff',   status: 'active',   joined: 'Jan 2020' },
-      { id: 'U-010', name: 'Emily Davis',         email: 'edavis@je.edu',     role: 'staff',   status: 'active',   joined: 'Mar 2021' },
-    ],
-    admissions: [
-      { id: 'APP-001', name: 'Zainab Ali', class: 'BSc Computer Science', date: 'Jul 15, 2026', status: 'pending' },
-      { id: 'APP-002', name: 'Omar Khan', class: 'BBA', date: 'Jul 16, 2026', status: 'pending' }
-    ]
-  };
-
-  // ── Mock Data: Kids Academy ────────────────────────────────────────────────
-  kidsData = {
-    stats: {
-      totalStudents: 320,
-      totalTeachers: 28,
-      totalClasses: 12,
-      pendingAdmissions: 5,
-      totalStaff: 8
-    },
-    classes: [
-      { id: 'KG-A', program: 'Kindergarten', semester: 'Year 1', students: 22, teacher: 'Ms. Emma Watson', room: 'KG-01', status: 'active' },
-      { id: 'G1-A', program: 'Grade 1', semester: 'Year 2', students: 26, teacher: 'Ms. Laura Perez', room: 'G1-02', status: 'active' },
-      { id: 'G2-B', program: 'Grade 2', semester: 'Year 3', students: 24, teacher: 'Mr. Tom Hanks', room: 'G2-03', status: 'active' },
-      { id: 'G3-A', program: 'Grade 3', semester: 'Year 4', students: 28, teacher: 'Ms. Zara Ali', room: 'G3-01', status: 'active' },
-      { id: 'G4-A', program: 'Grade 4', semester: 'Year 5', students: 25, teacher: 'Mr. Jake Ryan', room: 'G4-02', status: 'inactive' },
-      { id: 'G5-B', program: 'Grade 5', semester: 'Year 6', students: 20, teacher: 'Ms. Nina Patel', room: 'G5-03', status: 'active' },
-    ],
-    users: [
-      { id: 'K-001', name: 'Ms. Emma Watson',   email: 'emma@kids.edu',    role: 'teacher', status: 'active',   joined: 'Jan 2022' },
-      { id: 'K-002', name: 'Ms. Laura Perez',   email: 'laura@kids.edu',   role: 'teacher', status: 'active',   joined: 'Mar 2022' },
-      { id: 'K-003', name: 'Admin Kids',         email: 'admin@kids.edu',   role: 'admin',   status: 'active',   joined: 'Jun 2021' },
-      { id: 'K-004', name: 'Ali Hassan',         email: 'ali@kids.edu',     role: 'student', status: 'active',   joined: 'Sep 2024' },
-      { id: 'K-005', name: 'Sara Malik',         email: 'sara@kids.edu',    role: 'student', status: 'active',   joined: 'Jan 2025' },
-      { id: 'K-006', name: 'Bilal Ahmed',        email: 'bilal@kids.edu',   role: 'student', status: 'inactive', joined: 'Sep 2023' },
-      { id: 'K-007', name: 'John Smith',         email: 'jsmith@kids.edu',  role: 'staff',   status: 'active',   joined: 'Feb 2022' },
-    ],
-    admissions: [
-      { id: 'APP-101', name: 'Ayesha Raza', class: 'Grade 1', date: 'Jul 10, 2026', status: 'pending' },
-      { id: 'APP-102', name: 'Hamza Tariq', class: 'Kindergarten', date: 'Jul 12, 2026', status: 'pending' }
-    ]
-  };
-
+  // Get data from live stats
   get data() {
-    return this.selectedInstitution() === 'kids-academy' ? this.kidsData : this.jeData;
+    const stats = this.liveStats();
+    return {
+      stats: {
+        totalStudents: stats.totalStudents,
+        totalTeachers: stats.totalTeachers,
+        totalClasses: stats.totalClasses,
+        pendingAdmissions: stats.pendingAdmissions,
+        totalStaff: stats.totalStaff
+      },
+      classes: [
+        { id: 'CS-4A', program: 'Computer Science',        semester: '7th', students: 38, teacher: 'Dr. Sarah Connor',   room: 'CS-301', status: 'active' },
+        { id: 'CS-3B', program: 'Computer Science',        semester: '5th', students: 34, teacher: 'Prof. Alan Turing',  room: 'CS-204', status: 'active' },
+        { id: 'SE-2A', program: 'Software Engineering',    semester: '3rd', students: 41, teacher: 'Dr. John McCarthy',  room: 'SE-101', status: 'active' },
+        { id: 'IT-1B', program: 'Information Technology', semester: '1st', students: 45, teacher: 'Mary Shelley',       room: 'IT-102', status: 'active' },
+        { id: 'BBA-2B', program: 'Business Administration', semester: '3rd', students: 36, teacher: 'Prof. Adam Smith', room: 'BBA-201', status: 'active' },
+        { id: 'ECO-1A', program: 'Economics',              semester: '1st', students: 30, teacher: 'Dr. Keynes',         room: 'ECO-103', status: 'inactive' },
+      ]
+    };
   }
 
-  classSearchQuery = '';
-  userSearchQuery = '';
+  classSearchQuery    = '';
+  userSearchQuery     = '';
   admissionSearchQuery = '';
 
   get filteredClasses() {
     const query = this.classSearchQuery.toLowerCase().trim();
     if (!query) return this.data.classes;
-    return this.data.classes.filter(cls => 
+    return this.data.classes.filter(cls =>
       cls.id.toLowerCase().includes(query) ||
       cls.program.toLowerCase().includes(query) ||
       cls.teacher.toLowerCase().includes(query)
@@ -165,21 +138,7 @@ export class SuperAdmin implements OnInit {
   }
 
   get filteredUsers() {
-    let users = [...this.data.users];
-    
-    // Merge live backend admins if fetched from /admins/ endpoint
-    const liveAdmins = this.backendAdmins();
-    if (liveAdmins && liveAdmins.length > 0) {
-      const formattedLiveAdmins = liveAdmins.map(a => ({
-        id: a._id || a.id || 'A-001',
-        name: `${a.first_name || ''} ${a.last_name || ''}`.trim() || 'Admin User',
-        email: a.email || '',
-        role: 'admin',
-        status: (a.status || 'active').toLowerCase(),
-        joined: a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026'
-      }));
-      users = [...formattedLiveAdmins, ...users.filter(u => u.role !== 'admin')];
-    }
+    let users = this.liveUsers();
 
     const roleFilter = this.userRoleFilter();
     if (roleFilter) {
@@ -188,20 +147,20 @@ export class SuperAdmin implements OnInit {
 
     const query = this.userSearchQuery.toLowerCase().trim();
     if (query) {
-      users = users.filter(user => 
+      users = users.filter(user =>
         user.name.toLowerCase().includes(query) ||
         user.email.toLowerCase().includes(query) ||
         user.role.toLowerCase().includes(query)
       );
     }
-    
     return users;
   }
 
   get filteredAdmissions() {
+    const admissions = this.liveAdmissions();
     const query = this.admissionSearchQuery.toLowerCase().trim();
-    if (!query) return this.data.admissions;
-    return this.data.admissions.filter(adm => 
+    if (!query) return admissions;
+    return admissions.filter(adm =>
       adm.name.toLowerCase().includes(query) ||
       adm.id.toLowerCase().includes(query) ||
       adm.class.toLowerCase().includes(query)
@@ -209,18 +168,15 @@ export class SuperAdmin implements OnInit {
   }
 
   onClassSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.classSearchQuery = input.value;
+    this.classSearchQuery = (event.target as HTMLInputElement).value;
   }
 
   onUserSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.userSearchQuery = input.value;
+    this.userSearchQuery = (event.target as HTMLInputElement).value;
   }
 
   onAdmissionSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.admissionSearchQuery = input.value;
+    this.admissionSearchQuery = (event.target as HTMLInputElement).value;
   }
 
   get institutionLabel() {
@@ -243,38 +199,104 @@ export class SuperAdmin implements OnInit {
 
   fetchBackendData(): void {
     this.isLoadingData.set(true);
+    this.errorMessage.set(null);
 
-    // Fetch user profile
+    // Fetch profile (non-blocking)
     this.profileService.getProfile().subscribe({
       next: (profile) => this.userProfile.set(profile),
       error: () => {}
     });
 
-    // Fetch notices
-    this.noticeService.getNotices().subscribe({
-      next: (notices) => this.backendNotices.set(notices),
-      error: () => {}
-    });
+    // Parallel fetch: stats + all user lists + pending admissions
+    forkJoin({
+      stats:      this.adminService.getSuperAdminDashboard().pipe(catchError(() => of(null))),
+      admins:     this.adminService.getAdmins().pipe(catchError(() => of([]))),
+      students:   this.studentService.getStudents().pipe(catchError(() => of([]))),
+      teachers:   this.teacherService.getTeachers().pipe(catchError(() => of([]))),
+      staff:      this.staffService.getStaff().pipe(catchError(() => of([]))),
+      admissions: this.admissionService.getPendingAdmissions().pipe(catchError(() => of([])))
+    }).subscribe({
+      next: ({ stats, admins, students, teachers, staff, admissions }) => {
+        // Update stats signal
+        if (stats) {
+          this.liveStats.set({
+            totalStudents:    stats.total_students    ?? 0,
+            totalTeachers:    stats.total_teachers    ?? 0,
+            totalStaff:       stats.total_staff       ?? 0,
+            totalAdmins:      stats.total_admins      ?? 0,
+            totalClasses:     stats.total_classes     ?? 6,
+            pendingAdmissions: (admissions as any[]).length
+          });
+        }
 
-    // Fetch admins if user is super admin
-    this.adminService.getAdmins().subscribe({
-      next: (admins) => this.backendAdmins.set(admins),
-      error: () => {}
-    });
+        // Map admins → unified user format
+        const mappedAdmins = (admins as any[]).map((a, i) => ({
+          id:     a._id || `A-${i + 1}`.padStart(5, '0'),
+          name:   `${a.first_name || ''} ${a.last_name || ''}`.trim() || 'Admin User',
+          email:  a.email || '',
+          role:   'admin',
+          status: (a.status || 'active').toLowerCase() === 'approved' ? 'active' : (a.status || 'active').toLowerCase(),
+          joined: a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026'
+        }));
 
-    // Fetch activity logs if user is super admin
-    this.activityLogService.getActivityLogs().subscribe({
-      next: (logs) => this.backendActivityLogs.set(logs),
-      error: () => {}
-    });
+        // Map students → unified user format
+        const mappedStudents = (students as any[]).map((s, i) => ({
+          id:     s._id || `S-${i + 1}`.padStart(5, '0'),
+          name:   `${s.first_name || ''} ${s.last_name || ''}`.trim() || s.name || 'Student',
+          email:  s.email || '',
+          role:   'student',
+          status: (s.admission_status || 'active').toLowerCase() === 'approved' ? 'active' : 'active',
+          joined: s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Sep 2024'
+        }));
 
-    // Fetch settings
-    this.settingsService.getSettings().subscribe({
-      next: (settings) => {
-        this.backendSettings.set(settings);
+        // Map teachers → unified user format
+        const mappedTeachers = (teachers as any[]).map((t, i) => ({
+          id:     t._id || `T-${i + 1}`.padStart(5, '0'),
+          name:   `${t.first_name || ''} ${t.last_name || ''}`.trim() || t.name || 'Teacher',
+          email:  t.email || '',
+          role:   'teacher',
+          status: (t.teacher_status || 'active').toLowerCase() === 'active' ? 'active' : 'inactive',
+          joined: t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2023'
+        }));
+
+        // Map staff → unified user format
+        const mappedStaff = (staff as any[]).map((st, i) => ({
+          id:     st._id || `ST-${i + 1}`.padStart(5, '0'),
+          name:   `${st.first_name || ''} ${st.last_name || ''}`.trim() || st.name || 'Staff',
+          email:  st.email || '',
+          role:   'staff',
+          status: (st.staff_status || 'active').toLowerCase() === 'active' ? 'active' : 'inactive',
+          joined: st.created_at ? new Date(st.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2020'
+        }));
+
+        // Combine all users
+        this.liveUsers.set([
+          ...mappedAdmins,
+          ...mappedTeachers,
+          ...mappedStaff,
+          ...mappedStudents
+        ]);
+
+        // Map pending admissions
+        const mappedAdmissions = (admissions as any[]).map((adm, i) => ({
+          id:     adm._id || `APP-${i + 1}`.padStart(6, '0'),
+          name:   `${adm.first_name || ''} ${adm.last_name || ''}`.trim() || adm.name || 'Applicant',
+          class:  adm.program || adm.class_applied || adm.class || 'N/A',
+          date:   adm.created_at ? new Date(adm.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A',
+          status: adm.admission_status?.toLowerCase() || 'pending'
+        }));
+        this.liveAdmissions.set(mappedAdmissions);
+
+        // Update pendingAdmissions count in stats from actual list
+        const current = this.liveStats();
+        this.liveStats.set({ ...current, pendingAdmissions: mappedAdmissions.length });
+
         this.isLoadingData.set(false);
       },
-      error: () => this.isLoadingData.set(false)
+      error: (err) => {
+        this.errorMessage.set('Failed to load dashboard data. Please refresh.');
+        this.isLoadingData.set(false);
+      }
     });
   }
 
@@ -292,6 +314,7 @@ export class SuperAdmin implements OnInit {
   }
 
   getInitials(name: string): string {
+    if (!name) return '?';
     return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
   }
 

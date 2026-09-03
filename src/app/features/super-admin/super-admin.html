@@ -34,11 +34,11 @@
           <h2 class="sa-inst-name">J.E Academy</h2>
           <p class="sa-inst-desc">Higher Education — BSc, MSc, BBA Programs</p>
           <div class="sa-inst-meta">
-            <span class="sa-inst-stat">842 Students</span>
+            <span class="sa-inst-stat">{{ liveStats().totalStudents }} Students</span>
             <span class="sa-inst-dot">•</span>
-            <span class="sa-inst-stat">24 Classes</span>
+            <span class="sa-inst-stat">{{ liveStats().totalClasses }} Classes</span>
             <span class="sa-inst-dot">•</span>
-            <span class="sa-inst-stat">64 Teachers</span>
+            <span class="sa-inst-stat">{{ liveStats().totalTeachers }} Teachers</span>
           </div>
         </div>
         <div class="sa-inst-arrow">
@@ -56,11 +56,11 @@
           <h2 class="sa-inst-name">Kids Academy</h2>
           <p class="sa-inst-desc">Primary & Elementary — KG to Grade 5</p>
           <div class="sa-inst-meta">
-            <span class="sa-inst-stat">320 Students</span>
+            <span class="sa-inst-stat">{{ liveStats().totalStudents }} Students</span>
             <span class="sa-inst-dot">•</span>
-            <span class="sa-inst-stat">12 Classes</span>
+            <span class="sa-inst-stat">{{ liveStats().totalClasses }} Classes</span>
             <span class="sa-inst-dot">•</span>
-            <span class="sa-inst-stat">28 Teachers</span>
+            <span class="sa-inst-stat">{{ liveStats().totalTeachers }} Teachers</span>
           </div>
         </div>
         <div class="sa-inst-arrow">
@@ -144,13 +144,18 @@
         </h1>
       </div>
 
-      <!-- Top-Right: User Profile + Logout -->
+      <!-- Top-Right: User Profile + Refresh + Logout -->
       <div class="header-user-area">
         <div class="sa-inst-pill" [class.je-pill]="institutionAccent === 'je'" [class.kids-pill]="institutionAccent === 'kids'">
           <svg *ngIf="institutionAccent === 'je'" lucideGraduationCap style="width:0.85rem;height:0.85rem"></svg>
           <svg *ngIf="institutionAccent === 'kids'" lucideBookOpen style="width:0.85rem;height:0.85rem"></svg>
           {{ institutionLabel }}
         </div>
+        <!-- Refresh Button -->
+        <button class="btn-header-logout" (click)="fetchBackendData()" [disabled]="isLoadingData()" title="Refresh data" style="gap:0.4rem;">
+          <svg lucideRefreshCw class="logout-icon" [style.animation]="isLoadingData() ? 'spin 1s linear infinite' : 'none'"></svg>
+          <span>Refresh</span>
+        </button>
         <div class="header-user-chip">
           <div class="header-avatar" [class.je-avatar]="institutionAccent === 'je'" [class.kids-avatar]="institutionAccent === 'kids'">
             {{ getInitials(currentUser()?.name || 'SA') }}
@@ -167,6 +172,16 @@
       </div>
     </header>
 
+    <!-- Loading / Error Banner -->
+    <div *ngIf="isLoadingData()" style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 1.5rem;background:rgba(99,102,241,0.08);border-bottom:1px solid rgba(99,102,241,0.15);font-size:0.8rem;color:#a5b4fc;">
+      <svg lucideRefreshCw style="width:0.9rem;height:0.9rem;animation:spin 1s linear infinite"></svg>
+      Fetching live data from server…
+    </div>
+    <div *ngIf="errorMessage()" style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 1.5rem;background:rgba(239,68,68,0.08);border-bottom:1px solid rgba(239,68,68,0.15);font-size:0.8rem;color:#fca5a5;">
+      ⚠ {{ errorMessage() }}
+      <button (click)="fetchBackendData()" style="background:none;border:1px solid rgba(239,68,68,0.3);color:#fca5a5;cursor:pointer;padding:0.15rem 0.5rem;border-radius:0.3rem;font-size:0.75rem;">Retry</button>
+    </div>
+
     <!-- Dashboard Viewport -->
     <div class="dashboard-viewport">
 
@@ -182,7 +197,7 @@
             </div>
             <div class="sa-stat-body">
               <span class="sa-stat-label">Total Students</span>
-              <span class="sa-stat-value">{{ data.stats.totalStudents }}</span>
+              <span class="sa-stat-value">{{ liveStats().totalStudents }}</span>
             </div>
             <div class="sa-stat-trend up">↑ 12%</div>
           </div>
@@ -193,7 +208,7 @@
             </div>
             <div class="sa-stat-body">
               <span class="sa-stat-label">Teachers</span>
-              <span class="sa-stat-value">{{ data.stats.totalTeachers }}</span>
+              <span class="sa-stat-value">{{ liveStats().totalTeachers }}</span>
             </div>
             <div class="sa-stat-trend up">↑ 4%</div>
           </div>
@@ -204,7 +219,7 @@
             </div>
             <div class="sa-stat-body">
               <span class="sa-stat-label">Staff Members</span>
-              <span class="sa-stat-value">{{ data.stats.totalStaff }}</span>
+              <span class="sa-stat-value">{{ liveStats().totalStaff }}</span>
             </div>
             <div class="sa-stat-trend up">↑ 2%</div>
           </div>
@@ -215,7 +230,7 @@
             </div>
             <div class="sa-stat-body">
               <span class="sa-stat-label">Active Classes</span>
-              <span class="sa-stat-value">{{ data.stats.totalClasses }}</span>
+              <span class="sa-stat-value">{{ liveStats().totalClasses }}</span>
             </div>
             <div class="sa-stat-trend neutral">→ Stable</div>
           </div>
@@ -226,7 +241,7 @@
             </div>
             <div class="sa-stat-body">
               <span class="sa-stat-label">Pending Admissions</span>
-              <span class="sa-stat-value">{{ data.stats.pendingAdmissions }}</span>
+              <span class="sa-stat-value">{{ liveStats().pendingAdmissions }}</span>
             </div>
             <div class="sa-stat-trend down">↓ Review</div>
           </div>
@@ -257,12 +272,12 @@
               <div class="sa-summary-item">
                 <svg lucideUserCheck class="sa-sum-icon purple-icon" style="width:1rem;height:1rem"></svg>
                 <span class="sa-sum-label">Active Faculty</span>
-                <span class="sa-sum-val">{{ data.stats.totalTeachers }}</span>
+                <span class="sa-sum-val">{{ liveStats().totalTeachers }}</span>
               </div>
               <div class="sa-summary-item">
                 <svg lucideAlertCircle class="sa-sum-icon amber-icon" style="width:1rem;height:1rem"></svg>
                 <span class="sa-sum-label">Pending Reviews</span>
-                <span class="sa-sum-val amber-val">{{ data.stats.pendingAdmissions }}</span>
+                <span class="sa-sum-val amber-val">{{ liveStats().pendingAdmissions }}</span>
               </div>
             </div>
           </div>
@@ -350,6 +365,7 @@
             <div class="sa-table-title-block">
               <h3 class="sa-table-title">{{ userRoleFilter() ? (userRoleFilter() | titlecase) + ' Directory' : 'User Directory' }}</h3>
               <span class="sa-count-badge">{{ filteredUsers.length }} Members</span>
+              <span *ngIf="isLoadingData()" style="font-size:0.7rem;color:#6366f1;margin-left:0.4rem;">Loading…</span>
             </div>
             <div class="sa-table-search">
               <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>
@@ -424,6 +440,7 @@
             <div class="sa-table-title-block">
               <h3 class="sa-table-title">Pending Admissions</h3>
               <span class="sa-count-badge">{{ filteredAdmissions.length }} Applications</span>
+              <span *ngIf="isLoadingData()" style="font-size:0.7rem;color:#6366f1;margin-left:0.4rem;">Loading…</span>
             </div>
             <div class="sa-table-search">
               <svg lucideSearch style="width:0.9rem;height:0.9rem;color:#71717a"></svg>

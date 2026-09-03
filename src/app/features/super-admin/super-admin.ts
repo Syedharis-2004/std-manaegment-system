@@ -165,8 +165,22 @@ export class SuperAdmin implements OnInit {
   }
 
   get filteredUsers() {
-    let users = this.data.users;
+    let users = [...this.data.users];
     
+    // Merge live backend admins if fetched from /admins/ endpoint
+    const liveAdmins = this.backendAdmins();
+    if (liveAdmins && liveAdmins.length > 0) {
+      const formattedLiveAdmins = liveAdmins.map(a => ({
+        id: a._id || a.id || 'A-001',
+        name: `${a.first_name || ''} ${a.last_name || ''}`.trim() || 'Admin User',
+        email: a.email || '',
+        role: 'admin',
+        status: (a.status || 'active').toLowerCase(),
+        joined: a.created_at ? new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026'
+      }));
+      users = [...formattedLiveAdmins, ...users.filter(u => u.role !== 'admin')];
+    }
+
     const roleFilter = this.userRoleFilter();
     if (roleFilter) {
       users = users.filter(u => u.role === roleFilter);

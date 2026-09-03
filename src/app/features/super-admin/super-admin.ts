@@ -64,7 +64,7 @@ export class SuperAdmin implements OnInit {
   private router = inject(Router);
 
   // Phase control: select institution first, then show dashboard
-  selectedInstitution = signal<Institution | null>(null);
+  selectedInstitution = signal<Institution | null>('je-academy');
   activePage = signal<Page>('dashboard');
   userRoleFilter = signal<string | null>(null);
 

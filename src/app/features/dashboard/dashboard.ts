@@ -70,7 +70,7 @@ export class Dashboard implements OnInit {
 
   // Computed signals for user profile info
   currentUser = computed(() => this.authService.currentUser());
-  userRole = computed(() => this.currentUser()?.role || 'student');
+  userRole = computed(() => (this.currentUser()?.role || 'student').toLowerCase());
 
   studentAdmissionStatus = signal<string>('APPROVED');
 

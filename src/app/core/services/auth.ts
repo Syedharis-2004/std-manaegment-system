@@ -39,7 +39,11 @@ export class AuthService {
     const savedToken = localStorage.getItem('edu_token');
     if (savedUser && savedToken) {
       try {
-        this.currentUser.set(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.role) {
+          parsed.role = parsed.role.toLowerCase();
+        }
+        this.currentUser.set(parsed);
       } catch (e) {
         this.logout();
       }
